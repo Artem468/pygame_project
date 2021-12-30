@@ -95,7 +95,7 @@ class Second_tank_preview(pygame.sprite.Sprite):
 def select_skin_update(player):
     fon = pygame.transform.scale(load_image('fon.png'), size)
     screen.blit(fon, (0, 0))
-    font = pygame.font.Font(r'data\teletactile.ttf', 50)
+    font = pygame.font.Font(r'data\Teletactile.ttf', 50)
     text_coord = width // 2
     string_rendered = font.render(player, True, pygame.Color('black'))
     intro_rect = string_rendered.get_rect()
@@ -113,9 +113,6 @@ def select_skin_update(player):
     blue = pygame.transform.scale(load_image('blue_tank.png'), (90, 90))
     red = pygame.transform.scale(load_image('red_tank.png'), (90, 90))
     green = pygame.transform.scale(load_image('green_tank.png'), (90, 90))
-    pygame.draw.rect(screen, 'white', (200, height // 2 - 45, 90, 90))
-    pygame.draw.rect(screen, 'white', (400, height // 2 - 45, 90, 90))
-    pygame.draw.rect(screen, 'white', (600, height // 2 - 45, 90, 90))
     screen.blit(blue, (200, height // 2 - 45))
     screen.blit(red, (400, height // 2 - 45))
     screen.blit(green, (600, height // 2 - 45))
@@ -188,7 +185,7 @@ def start_screen_update():
 
     fon = pygame.transform.scale(load_image('fon.png'), size)
     screen.blit(fon, (0, 0))
-    font = pygame.font.Font(r'data\teletactile.ttf', 60)
+    font = pygame.font.Font(r'data\Teletactile.ttf', 60)
     text_coord = width // 2
     for line in intro_text:
         string_rendered = font.render(line, True, pygame.Color('black'))
@@ -201,7 +198,7 @@ def start_screen_update():
         screen.blit(string_rendered, intro_rect)
 
     pygame.draw.rect(screen, 'green', (365, 300, 165, 50))
-    font = pygame.font.Font(r'data\teletactile.ttf', 50)
+    font = pygame.font.Font(r'data\Teletactile.ttf', 50)
     string_rendered = font.render('Play', True, pygame.Color('black'))
     intro_rect = string_rendered.get_rect()
     intro_rect.x = width // 2 - string_rendered.get_width() // 2
@@ -209,7 +206,7 @@ def start_screen_update():
     screen.blit(string_rendered, intro_rect)
 
     pygame.draw.rect(screen, 'green', (180, 400, 260, 35))
-    font = pygame.font.Font(r'data\teletactile.ttf', 30)
+    font = pygame.font.Font(r'data\Teletactile.ttf', 30)
     string_rendered = font.render('1st player', True, pygame.Color('black'))
     intro_rect = string_rendered.get_rect()
     intro_rect.x = width // 2 - string_rendered.get_width() // 2 - 140
@@ -217,7 +214,7 @@ def start_screen_update():
     screen.blit(string_rendered, intro_rect)
 
     pygame.draw.rect(screen, 'green', (470, 400, 260, 35))
-    font = pygame.font.Font(r'data\teletactile.ttf', 30)
+    font = pygame.font.Font(r'data\Teletactile.ttf', 30)
     string_rendered = font.render('2nd player', True, pygame.Color('black'))
     intro_rect = string_rendered.get_rect()
     intro_rect.x = width // 2 - string_rendered.get_width() // 2 + 150
@@ -269,6 +266,27 @@ class Bullet(pygame.sprite.Sprite):
         self.image = Bullet.image
         self.rect = self.image.get_rect()
         self.direction = 'up'
+        self.speed = 5
+        self.flag = False
+
+    def update(self):
+        if self.flag:
+            if self.direction == 'up':
+                self.rect.y -= self.speed
+            elif self.direction == 'down':
+                self.rect.y += self.speed
+            elif self.direction == 'left':
+                self.rect.x -= self.speed
+            elif self.direction == 'right':
+                self.rect.x += self.speed
+        if self.rect.x > 900:
+            self.flag = False
+        elif self.rect.x < -35:
+            self.flag = False
+        elif self.rect.y > 900:
+            self.flag = False
+        elif self.rect.y < -40:
+            self.flag = False
 
 
 class Board:
@@ -311,7 +329,7 @@ class Board:
 
 
 bullet_sprites = pygame.sprite.Group()
-bullet_sprites = Bullet(bullet_sprites)
+bullet = Bullet(bullet_sprites)
 
 
 class First_tank(pygame.sprite.Sprite):
@@ -430,11 +448,47 @@ class Second_tank(pygame.sprite.Sprite):
                 self.image = pygame.transform.rotate(self.image, 270)
             self.direction = 'down'
         if action == 'fire':
-            bullet.rect.x = self.rect.x + self.image.get_width() // 2
-            bullet.rect.y = self.rect.y + self.image.get_height() // 2
-            bullet.direction = self.direction
-            print(self.rect)
-            print(bullet.rect, bullet.direction)
+            if self.direction == 'left':
+                bullet.rect.x = self.rect.x + self.image.get_width() // 2 - 70
+                bullet.rect.y = self.rect.y + self.image.get_height() // 2 - 5
+                if bullet.direction == 'right':
+                    bullet.image = pygame.transform.rotate(bullet.image, 180)
+                elif bullet.direction == 'up':
+                    bullet.image = pygame.transform.rotate(bullet.image, 90)
+                elif bullet.direction == 'down':
+                    bullet.image = pygame.transform.rotate(bullet.image, 270)
+                bullet.direction = 'left'
+            if self.direction == 'right':
+                bullet.rect.x = self.rect.x + self.image.get_width() // 2 + 40
+                bullet.rect.y = self.rect.y + self.image.get_height() // 2 - 5
+                if bullet.direction == 'left':
+                    bullet.image = pygame.transform.rotate(bullet.image, 180)
+                elif bullet.direction == 'up':
+                    bullet.image = pygame.transform.rotate(bullet.image, 270)
+                elif bullet.direction == 'down':
+                    bullet.image = pygame.transform.rotate(bullet.image, 90)
+                bullet.direction = 'right'
+            if self.direction == 'up':
+                bullet.rect.x = self.rect.x + self.image.get_width() // 2 - 7
+                bullet.rect.y = self.rect.y + self.image.get_height() // 2 - 70
+                if bullet.direction == 'down':
+                    bullet.image = pygame.transform.rotate(bullet.image, 180)
+                elif bullet.direction == 'left':
+                    bullet.image = pygame.transform.rotate(bullet.image, 270)
+                elif bullet.direction == 'right':
+                    bullet.image = pygame.transform.rotate(bullet.image, 90)
+                bullet.direction = 'up'
+            if self.direction == 'down':
+                bullet.rect.x = self.rect.x + self.image.get_width() // 2 - 7
+                bullet.rect.y = self.rect.y + self.image.get_height() // 2 + 40
+                if bullet.direction == 'up':
+                    bullet.image = pygame.transform.rotate(bullet.image, 180)
+                elif bullet.direction == 'left':
+                    bullet.image = pygame.transform.rotate(bullet.image, 90)
+                elif bullet.direction == 'right':
+                    bullet.image = pygame.transform.rotate(bullet.image, 270)
+                bullet.direction = 'down'
+            bullet.flag = True
         self.rect.y += self.speedy
         self.rect.x += self.speedx
         if self.rect.right > 900:
@@ -488,6 +542,7 @@ while running:
             elif event.key == pygame.K_RSHIFT:
                 second_sprites.update('fire')
     screen.fill((26, 148, 49))
+    bullet.update()
     all_sprites.draw(screen)
     board.render(screen)
     pygame.display.flip()
