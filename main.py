@@ -39,13 +39,23 @@ def tanks_preview_update():
     global tank1, tank2, flag_tanks
     if flag_tanks:
        tank1.rect.x = -200
-       tank2.rect.x = -200
+       tank2.rect.x = 1100
+       tank1 = First_tank_preview(all_sprites)
+       tank1.rect.x = -90
+       tank2.rect.x = 900
+       print(first_player, second_player)
+       im = load_image(f'{first_player}_tank.png')
+       im = pygame.transform.scale(im, (90, 90))
+       im = pygame.transform.rotate(im, 270)
+       tank1.image = im
+       im = load_image(f'{second_player}_tank.png')
+       im = pygame.transform.scale(im, (90, 90))
+       im = pygame.transform.rotate(im, 90)
+       tank2.image = im
     else:
         tank1 = First_tank_preview(all_sprites)
         tank2 = Second_tank_preview(all_sprites)
-    First_tank_preview.image = load_image(f'{first_player}_tank.png')
-    Second_tank_preview.image = load_image(f'{second_player}_tank.png')
-    flag_tanks = True
+        flag_tanks = True
 
 
 class First_tank_preview(pygame.sprite.Sprite):
@@ -55,15 +65,14 @@ class First_tank_preview(pygame.sprite.Sprite):
 
     def __init__(self, *group):
         super().__init__(*group)
-        self.image = First_tank_preview.image
         self.rect = self.image.get_rect()
-        self.rect.x, self.rect.y = 0, 600
+        self.rect.x, self.rect.y = -90, 600
         self.speed = 10
 
     def update(self, *args):
         self.rect.x += self.speed
         if self.rect.x == 1000:
-            self.rect.x = 0
+            self.rect.x = -90
 
 
 class Second_tank_preview(pygame.sprite.Sprite):
@@ -73,7 +82,6 @@ class Second_tank_preview(pygame.sprite.Sprite):
 
     def __init__(self, *group):
         super().__init__(*group)
-        self.image = Second_tank_preview.image
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = 900, 700
         self.speed = 10
@@ -81,7 +89,7 @@ class Second_tank_preview(pygame.sprite.Sprite):
     def update(self, *args):
         self.rect.x -= self.speed
         if self.rect.x == -100:
-            self.rect.x = 900 + self.rect.width
+            self.rect.x = 990
 
 
 def select_skin_update(player):
