@@ -8,6 +8,10 @@ screen = pygame.display.set_mode(size)
 pygame.display.set_caption('PyGame project')
 FPS = 60
 
+first_player = 'blue'
+second_player = 'red'
+all_sprites = pygame.sprite.Group()
+
 
 def terminate():
     pygame.quit()
@@ -28,6 +32,42 @@ def load_image(name, colorkey=None):
     else:
         image = image.convert_alpha()
     return image
+
+
+class First_tank_preview(pygame.sprite.Sprite):
+    image = load_image(f'{first_player}_tank.png')
+    image = pygame.transform.scale(image, (90, 90))
+    image = pygame.transform.rotate(image, -90)
+
+    def __init__(self, *group):
+        super().__init__(*group)
+        self.image = First_tank_preview.image
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = 0, 600
+        self.speed = 10
+
+    def update(self, *args):
+        self.rect.x += self.speed
+        if self.rect.x == 1000:
+            self.rect.x = 0
+
+
+class Second_tank_preview(pygame.sprite.Sprite):
+    image = load_image(f'{second_player}_tank.png')
+    image = pygame.transform.scale(image, (90, 90))
+    image = pygame.transform.rotate(image, 90)
+
+    def __init__(self, *group):
+        super().__init__(*group)
+        self.image = Second_tank_preview.image
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = 900, 700
+        self.speed = 10
+
+    def update(self, *args):
+        self.rect.x -= self.speed
+        if self.rect.x == -100:
+            self.rect.x = 900 + self.rect.width
 
 
 def select_skin_update(player):
@@ -152,6 +192,8 @@ def start_screen_update():
 
 def start_screen():
     start_screen_update()
+    tank1 = First_tank_preview(all_sprites)
+    tank2 = Second_tank_preview(all_sprites)
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -168,13 +210,14 @@ def start_screen():
                     if event.pos[1] >= 400 and event.pos[1] <= 435:
                         select_skin('2nd player')
                         start_screen_update()
-
+        start_screen_update()
+        tank1.update()
+        tank2.update()
+        all_sprites.draw(screen)
         pygame.display.flip()
         clock.tick(FPS)
 
 
-first_player = 'blue'
-second_player = 'red'
 clock = pygame.time.Clock()
 start_screen()
 
@@ -344,7 +387,6 @@ class Second_tank(pygame.sprite.Sprite):
             self.rect.bottom = 900
 
 
-all_sprites = pygame.sprite.Group()
 first_sprites = pygame.sprite.Group()
 First_tank(first_sprites)
 second_sprites = pygame.sprite.Group()
