@@ -260,6 +260,17 @@ clock = pygame.time.Clock()
 start_screen()
 
 
+class Bullet(pygame.sprite.Sprite):
+    image = load_image('bullet.png')
+    image = pygame.transform.scale(image, (15, 35))
+
+    def __init__(self, *group):
+        super(Bullet, self).__init__(*group)
+        self.image = Bullet.image
+        self.rect = self.image.get_rect()
+        self.direction = 'up'
+
+
 class Board:
     def __init__(self, width, height):
         self.width = width
@@ -297,6 +308,10 @@ class Board:
 
     def on_click(self, cell_coords):
         ...
+
+
+bullet_sprites = pygame.sprite.Group()
+bullet_sprites = Bullet(bullet_sprites)
 
 
 class First_tank(pygame.sprite.Sprite):
@@ -365,15 +380,16 @@ class First_tank(pygame.sprite.Sprite):
 class Second_tank(pygame.sprite.Sprite):
     image = load_image(f'{second_player}_tank.png')
     image = pygame.transform.scale(image, (90, 90))
+    image = pygame.transform.rotate(image, 180)
 
     def __init__(self, *group):
         super().__init__(*group)
         self.image = Second_tank.image
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = 810, 0
-        self.direction = 'up'
+        self.direction = 'down'
 
-    def update(self, direction):
+    def update(self, action):
         self.speedx = 0
         self.speedy = 0
         keystate = pygame.key.get_pressed()
@@ -413,6 +429,12 @@ class Second_tank(pygame.sprite.Sprite):
             elif self.direction == 'right':
                 self.image = pygame.transform.rotate(self.image, 270)
             self.direction = 'down'
+        if action == 'fire':
+            bullet.rect.x = self.rect.x + self.image.get_width() // 2
+            bullet.rect.y = self.rect.y + self.image.get_height() // 2
+            bullet.direction = self.direction
+            print(self.rect)
+            print(bullet.rect, bullet.direction)
         self.rect.y += self.speedy
         self.rect.x += self.speedx
         if self.rect.right > 900:
@@ -429,6 +451,7 @@ first_sprites = pygame.sprite.Group()
 First_tank(first_sprites)
 second_sprites = pygame.sprite.Group()
 Second_tank(second_sprites)
+all_sprites.add(bullet_sprites)
 all_sprites.add(first_sprites)
 all_sprites.add(second_sprites)
 board = Board(10, 10)
@@ -460,6 +483,10 @@ while running:
                 first_sprites.update('right')
             elif event.key == pygame.K_RIGHT:
                 second_sprites.update('right')
+            elif event.key == pygame.K_LSHIFT:
+                first_sprites.update('fire')
+            elif event.key == pygame.K_RSHIFT:
+                second_sprites.update('fire')
     screen.fill((26, 148, 49))
     all_sprites.draw(screen)
     board.render(screen)
