@@ -130,7 +130,7 @@ class First_tank_preview(pygame.sprite.Sprite):
         super().__init__(*group)
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = -90, 600
-        self.speed = 10
+        self.speed = 15
 
     def update(self, *args):
         self.rect.x += self.speed
@@ -147,7 +147,7 @@ class Second_tank_preview(pygame.sprite.Sprite):
         super().__init__(*group)
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = 900, 700
-        self.speed = 10
+        self.speed = 15
 
     def update(self, *args):
         self.rect.x -= self.speed
@@ -289,6 +289,7 @@ def start_screen():
     start_screen_update()
     tanks_preview_update()
     while True:
+        clock.tick(FPS)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
@@ -313,7 +314,7 @@ def start_screen():
         tank2.update()
         all_sprites.draw(screen)
         pygame.display.flip()
-        clock.tick(FPS)
+
 
 
 clock = pygame.time.Clock()
@@ -328,6 +329,7 @@ class Bullet(pygame.sprite.Sprite):
         super(Bullet, self).__init__(*group)
         self.image = Bullet.image
         self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = -100, -100
         self.direction = 'up'
         self.speed = 5
         self.flag = False
@@ -408,6 +410,8 @@ class First_tank(pygame.sprite.Sprite):
                 self.image = pygame.transform.rotate(self.image, 270)
             self.direction = 'down'
         if action == 'fire':
+            bullet = Bullet(bullet_sprites)
+            all_sprites.add(bullet_sprites)
             if self.direction == 'left':
                 bullet.rect.x = self.rect.x + self.image.get_width() // 2 - 70
                 bullet.rect.y = self.rect.y + self.image.get_height() // 2 - 5
@@ -514,6 +518,8 @@ class Second_tank(pygame.sprite.Sprite):
                 self.image = pygame.transform.rotate(self.image, 270)
             self.direction = 'down'
         if action == 'fire':
+            bullet = Bullet(bullet_sprites)
+            all_sprites.add(bullet_sprites)
             if self.direction == 'left':
                 bullet.rect.x = self.rect.x + self.image.get_width() // 2 - 70
                 bullet.rect.y = self.rect.y + self.image.get_height() // 2 - 5
@@ -578,7 +584,6 @@ all_sprites.add(hero_group)
 all_sprites.add(sprite_group)
 all_sprites.add(first_sprites)
 all_sprites.add(second_sprites)
-all_sprites.add(bullet_sprites)
 running = True
 while running:
     clock.tick(FPS)
@@ -609,7 +614,7 @@ while running:
             elif event.key == pygame.K_RSHIFT:
                 second_sprites.update('fire')
     screen.fill((26, 148, 49))
-    bullet.update()
+    bullet_sprites.update()
     all_sprites.draw(screen)
     pygame.display.flip()
 pygame.quit()
