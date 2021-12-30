@@ -11,6 +11,7 @@ FPS = 60
 first_player = 'blue'
 second_player = 'red'
 all_sprites = pygame.sprite.Group()
+flag_tanks = False
 
 
 def terminate():
@@ -32,6 +33,19 @@ def load_image(name, colorkey=None):
     else:
         image = image.convert_alpha()
     return image
+
+
+def tanks_preview_update():
+    global tank1, tank2, flag_tanks
+    if flag_tanks:
+       tank1.rect.x = -200
+       tank2.rect.x = -200
+    else:
+        tank1 = First_tank_preview(all_sprites)
+        tank2 = Second_tank_preview(all_sprites)
+    First_tank_preview.image = load_image(f'{first_player}_tank.png')
+    Second_tank_preview.image = load_image(f'{second_player}_tank.png')
+    flag_tanks = True
 
 
 class First_tank_preview(pygame.sprite.Sprite):
@@ -101,15 +115,29 @@ def select_skin_update(player):
 
 def select_skin(player):
     select_skin_update(player)
-
+    global first_player, second_player
     done = pygame.transform.scale(load_image('done.png'), (20, 20))
     if player == '1st player':
-        pygame.draw.rect(screen, 'green', (235, height // 2 + 55, 20, 20))
-        screen.blit(done, (234, height // 2 + 55))
+        if first_player == 'blue':
+            pygame.draw.rect(screen, 'green', (235, height // 2 + 55, 20, 20))
+            screen.blit(done, (234, height // 2 + 55))
+        elif first_player == 'red':
+            pygame.draw.rect(screen, 'green', (435, height // 2 + 55, 20, 20))
+            screen.blit(done, (434, height // 2 + 55))
+        else:
+            pygame.draw.rect(screen, 'green', (635, height // 2 + 55, 20, 20))
+            screen.blit(done, (634, height // 2 + 55))
     if player == '2nd player':
-        pygame.draw.rect(screen, 'green', (435, height // 2 + 55, 20, 20))
-        screen.blit(done, (434, height // 2 + 55))
-    global first_player, second_player
+        if second_player == 'blue':
+            pygame.draw.rect(screen, 'green', (235, height // 2 + 55, 20, 20))
+            screen.blit(done, (234, height // 2 + 55))
+        elif second_player == 'red':
+            pygame.draw.rect(screen, 'green', (435, height // 2 + 55, 20, 20))
+            screen.blit(done, (434, height // 2 + 55))
+        else:
+            pygame.draw.rect(screen, 'green', (635, height // 2 + 55, 20, 20))
+            screen.blit(done, (634, height // 2 + 55))
+
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -117,7 +145,6 @@ def select_skin(player):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.pos[0] >= 15 and event.pos[0] <= 55:
                     if event.pos[1] >= 15 and event.pos[1] <= 55:
-                        print(first_player, second_player)
                         return
                 if event.pos[1] >= height // 2 - 45 and event.pos[1] <= height // 2 + 45:
                     if event.pos[0] >= 200 and event.pos[0] <= 290:
@@ -192,8 +219,7 @@ def start_screen_update():
 
 def start_screen():
     start_screen_update()
-    tank1 = First_tank_preview(all_sprites)
-    tank2 = Second_tank_preview(all_sprites)
+    tanks_preview_update()
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -201,15 +227,19 @@ def start_screen():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.pos[0] >= 365 and event.pos[0] <= 530:
                     if event.pos[1] >= 300 and event.pos[1] <= 350:
+                        tank1.rect.x = -200
+                        tank2.rect.x = -200
                         return
                 if event.pos[0] >= 180 and event.pos[0] <= 440:
                     if event.pos[1] >= 400 and event.pos[1] <= 435:
                         select_skin('1st player')
                         start_screen_update()
+                        tanks_preview_update()
                 if event.pos[0] >= 470 and event.pos[0] <= 730:
                     if event.pos[1] >= 400 and event.pos[1] <= 435:
                         select_skin('2nd player')
                         start_screen_update()
+                        tanks_preview_update()
         start_screen_update()
         tank1.update()
         tank2.update()
