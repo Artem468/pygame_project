@@ -343,7 +343,7 @@ class First_tank(pygame.sprite.Sprite):
         self.rect.x, self.rect.y = 0, 810
         self.direction = 'up'
 
-    def update(self, direction):
+    def update(self, action):
         self.speedx = 0
         self.speedy = 0
         keystate = pygame.key.get_pressed()
@@ -383,6 +383,48 @@ class First_tank(pygame.sprite.Sprite):
             elif self.direction == 'right':
                 self.image = pygame.transform.rotate(self.image, 270)
             self.direction = 'down'
+        if action == 'fire':
+            if self.direction == 'left':
+                bullet.rect.x = self.rect.x + self.image.get_width() // 2 - 70
+                bullet.rect.y = self.rect.y + self.image.get_height() // 2 - 5
+                if bullet.direction == 'right':
+                    bullet.image = pygame.transform.rotate(bullet.image, 180)
+                elif bullet.direction == 'up':
+                    bullet.image = pygame.transform.rotate(bullet.image, 90)
+                elif bullet.direction == 'down':
+                    bullet.image = pygame.transform.rotate(bullet.image, 270)
+                bullet.direction = 'left'
+            if self.direction == 'right':
+                bullet.rect.x = self.rect.x + self.image.get_width() // 2 + 40
+                bullet.rect.y = self.rect.y + self.image.get_height() // 2 - 5
+                if bullet.direction == 'left':
+                    bullet.image = pygame.transform.rotate(bullet.image, 180)
+                elif bullet.direction == 'up':
+                    bullet.image = pygame.transform.rotate(bullet.image, 270)
+                elif bullet.direction == 'down':
+                    bullet.image = pygame.transform.rotate(bullet.image, 90)
+                bullet.direction = 'right'
+            if self.direction == 'up':
+                bullet.rect.x = self.rect.x + self.image.get_width() // 2 - 7
+                bullet.rect.y = self.rect.y + self.image.get_height() // 2 - 70
+                if bullet.direction == 'down':
+                    bullet.image = pygame.transform.rotate(bullet.image, 180)
+                elif bullet.direction == 'left':
+                    bullet.image = pygame.transform.rotate(bullet.image, 270)
+                elif bullet.direction == 'right':
+                    bullet.image = pygame.transform.rotate(bullet.image, 90)
+                bullet.direction = 'up'
+            if self.direction == 'down':
+                bullet.rect.x = self.rect.x + self.image.get_width() // 2 - 7
+                bullet.rect.y = self.rect.y + self.image.get_height() // 2 + 40
+                if bullet.direction == 'up':
+                    bullet.image = pygame.transform.rotate(bullet.image, 180)
+                elif bullet.direction == 'left':
+                    bullet.image = pygame.transform.rotate(bullet.image, 90)
+                elif bullet.direction == 'right':
+                    bullet.image = pygame.transform.rotate(bullet.image, 270)
+                bullet.direction = 'down'
+            bullet.flag = True
         self.rect.y += self.speedy
         self.rect.x += self.speedx
         if self.rect.right > 900:
