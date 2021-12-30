@@ -35,23 +35,86 @@ def load_image(name, colorkey=None):
     return image
 
 
+tile_images = {
+    'wall': load_image('box.png'),
+    'empty': load_image('grass.png')
+}
+tile_width = tile_height = 90
+
+
+class ScreenFrame(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.rect = (0, 0, 500, 500)
+
+
+class SpriteGroup(pygame.sprite.Group):
+    def __init__(self):
+        super().__init__()
+
+    def get_event(self, event):
+        for sprite in self:
+            sprite.get_event(event)
+
+
+class Sprite(pygame.sprite.Sprite):
+    def __init__(self, group):
+        super().__init__(group)
+        self.rect = None
+
+    def get_event(self, event):
+        pass
+
+
+player = None
+running = True
+clock = pygame.time.Clock()
+sprite_group = SpriteGroup()
+hero_group = SpriteGroup()
+
+
+class Tile(Sprite):
+    def __init__(self, tile_type, pos_x, pos_y):
+        super().__init__(sprite_group)
+        self.image = tile_images[tile_type]
+        self.rect = self.image.get_rect().move(
+            tile_width * pos_x, tile_height * pos_y)
+
+
+def load_level(filename):
+    filename = "data/" + filename
+    with open(filename, 'r') as mapFile:
+        level_map = [line.strip() for line in mapFile]
+    max_width = max(map(len, level_map))
+    return list(map(lambda x: list(x.ljust(max_width, '.')), level_map))
+
+
+def generate_level(level):
+    for y in range(len(level)):
+        for x in range(len(level[y])):
+            if level[y][x] == '@':
+                Tile('empty', x, y)
+            elif level[y][x] == '#':
+                Tile('wall', x, y)
+
+
 def tanks_preview_update():
     global tank1, tank2, flag_tanks
     if flag_tanks:
-       tank1.rect.x = -200
-       tank2.rect.x = 1100
-       tank1 = First_tank_preview(all_sprites)
-       tank1.rect.x = -90
-       tank2.rect.x = 900
-       print(first_player, second_player)
-       im = load_image(f'{first_player}_tank.png')
-       im = pygame.transform.scale(im, (90, 90))
-       im = pygame.transform.rotate(im, 270)
-       tank1.image = im
-       im = load_image(f'{second_player}_tank.png')
-       im = pygame.transform.scale(im, (90, 90))
-       im = pygame.transform.rotate(im, 90)
-       tank2.image = im
+        tank1.rect.x = -200
+        tank2.rect.x = 1100
+        tank1 = First_tank_preview(all_sprites)
+        tank1.rect.x = -90
+        tank2.rect.x = 900
+        print(first_player, second_player)
+        im = load_image(f'{first_player}_tank.png')
+        im = pygame.transform.scale(im, (90, 90))
+        im = pygame.transform.rotate(im, 270)
+        tank1.image = im
+        im = load_image(f'{second_player}_tank.png')
+        im = pygame.transform.scale(im, (90, 90))
+        im = pygame.transform.rotate(im, 90)
+        tank2.image = im
     else:
         tank1 = First_tank_preview(all_sprites)
         tank2 = Second_tank_preview(all_sprites)
@@ -71,7 +134,7 @@ class First_tank_preview(pygame.sprite.Sprite):
 
     def update(self, *args):
         self.rect.x += self.speed
-        if self.rect.x == 1000:
+        if self.rect.x >= 1000:
             self.rect.x = -90
 
 
@@ -88,14 +151,14 @@ class Second_tank_preview(pygame.sprite.Sprite):
 
     def update(self, *args):
         self.rect.x -= self.speed
-        if self.rect.x == -100:
+        if self.rect.x <= -100:
             self.rect.x = 990
 
 
 def select_skin_update(player):
-    fon = pygame.transform.scale(load_image('fon.png'), size)
+    fon = pygame.transform.scale(load_image('background.png'), size)
     screen.blit(fon, (0, 0))
-    font = pygame.font.Font(r'data\Teletactile.ttf', 50)
+    font = pygame.font.Font(r'data\teletactile.ttf', 50)
     text_coord = width // 2
     string_rendered = font.render(player, True, pygame.Color('black'))
     intro_rect = string_rendered.get_rect()
@@ -183,9 +246,9 @@ def select_skin(player):
 def start_screen_update():
     intro_text = ['Tanks v. 2.0']
 
-    fon = pygame.transform.scale(load_image('fon.png'), size)
+    fon = pygame.transform.scale(load_image('background.png'), size)
     screen.blit(fon, (0, 0))
-    font = pygame.font.Font(r'data\Teletactile.ttf', 60)
+    font = pygame.font.Font(r'data\teletactile.ttf', 60)
     text_coord = width // 2
     for line in intro_text:
         string_rendered = font.render(line, True, pygame.Color('black'))
@@ -198,7 +261,7 @@ def start_screen_update():
         screen.blit(string_rendered, intro_rect)
 
     pygame.draw.rect(screen, 'green', (365, 300, 165, 50))
-    font = pygame.font.Font(r'data\Teletactile.ttf', 50)
+    font = pygame.font.Font(r'data\teletactile.ttf', 50)
     string_rendered = font.render('Play', True, pygame.Color('black'))
     intro_rect = string_rendered.get_rect()
     intro_rect.x = width // 2 - string_rendered.get_width() // 2
@@ -206,7 +269,7 @@ def start_screen_update():
     screen.blit(string_rendered, intro_rect)
 
     pygame.draw.rect(screen, 'green', (180, 400, 260, 35))
-    font = pygame.font.Font(r'data\Teletactile.ttf', 30)
+    font = pygame.font.Font(r'data\teletactile.ttf', 30)
     string_rendered = font.render('1st player', True, pygame.Color('black'))
     intro_rect = string_rendered.get_rect()
     intro_rect.x = width // 2 - string_rendered.get_width() // 2 - 140
@@ -214,7 +277,7 @@ def start_screen_update():
     screen.blit(string_rendered, intro_rect)
 
     pygame.draw.rect(screen, 'green', (470, 400, 260, 35))
-    font = pygame.font.Font(r'data\Teletactile.ttf', 30)
+    font = pygame.font.Font(r'data\teletactile.ttf', 30)
     string_rendered = font.render('2nd player', True, pygame.Color('black'))
     intro_rect = string_rendered.get_rect()
     intro_rect.x = width // 2 - string_rendered.get_width() // 2 + 150
@@ -287,45 +350,6 @@ class Bullet(pygame.sprite.Sprite):
             self.flag = False
         elif self.rect.y < -40:
             self.flag = False
-
-
-class Board:
-    def __init__(self, width, height):
-        self.width = width
-        self.height = height
-        self.board = [[0] * width for _ in range(height)]
-        self.left = 5
-        self.top = 5
-        self.cell_size = 10
-
-    def render(self, screen):
-        for y in range(self.height):
-            for x in range(self.width):
-                pygame.draw.rect(screen, pygame.Color(0, 82, 33), (
-                    x * self.cell_size + self.left,
-                    y * self.cell_size + self.top,
-                    self.cell_size,
-                    self.cell_size), 1)
-
-    def set_view(self, left, top, cell_size):
-        self.left = left
-        self.top = top
-        self.cell_size = cell_size
-
-    def get_click(self, mouse_pos):
-        cell = self.get_cell(mouse_pos)
-        self.on_click(cell)
-
-    def get_cell(self, mouse_pos):
-        x1 = (mouse_pos[0] - self.left) // self.cell_size
-        y1 = (mouse_pos[1] - self.top) // self.cell_size
-        if 0 <= x1 < self.width and 0 <= y1 < self.height:
-            print((x1, y1))
-        else:
-            print(None)
-
-    def on_click(self, cell_coords):
-        ...
 
 
 bullet_sprites = pygame.sprite.Group()
@@ -543,15 +567,18 @@ class Second_tank(pygame.sprite.Sprite):
             self.rect.bottom = 900
 
 
+level_map = load_level("map.map")
+generate_level(level_map)
+
 first_sprites = pygame.sprite.Group()
 First_tank(first_sprites)
 second_sprites = pygame.sprite.Group()
 Second_tank(second_sprites)
-all_sprites.add(bullet_sprites)
+all_sprites.add(hero_group)
+all_sprites.add(sprite_group)
 all_sprites.add(first_sprites)
 all_sprites.add(second_sprites)
-board = Board(10, 10)
-board.set_view(0, 0, 90)
+all_sprites.add(bullet_sprites)
 running = True
 while running:
     clock.tick(FPS)
@@ -560,8 +587,6 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            board.get_click(event.pos)
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_w:
                 first_sprites.update('up')
@@ -586,6 +611,5 @@ while running:
     screen.fill((26, 148, 49))
     bullet.update()
     all_sprites.draw(screen)
-    board.render(screen)
     pygame.display.flip()
 pygame.quit()
