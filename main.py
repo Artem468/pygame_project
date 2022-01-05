@@ -8,6 +8,7 @@ screen = pygame.display.set_mode(size)
 pygame.display.set_caption('PyGame project')
 FPS = 60
 TIME_RELOAD = 3000
+SPEED = 5
 
 first_player = 'blue'
 second_player = 'red'
@@ -169,7 +170,12 @@ def tanks_preview_update():
 
 class First_tank_preview(pygame.sprite.Sprite):
     image = load_image(f'{first_player}_tank.png')
-    image = pygame.transform.scale(image, (90, 90))
+    if first_player == 'blue':
+        image = pygame.transform.scale(image, (80, 70))
+    elif second_player == 'green':
+        image = pygame.transform.scale(image, (80, 80))
+    else:
+        image = pygame.transform.scale(image, (70, 80))
     image = pygame.transform.rotate(image, -90)
 
     def __init__(self, *group):
@@ -186,7 +192,12 @@ class First_tank_preview(pygame.sprite.Sprite):
 
 class Second_tank_preview(pygame.sprite.Sprite):
     image = load_image(f'{second_player}_tank.png')
-    image = pygame.transform.scale(image, (90, 90))
+    if second_player == 'blue':
+        image = pygame.transform.scale(image, (80, 70))
+    elif second_player == 'green':
+        image = pygame.transform.scale(image, (80, 80))
+    else:
+        image = pygame.transform.scale(image, (70, 80))
     image = pygame.transform.rotate(image, 90)
 
     def __init__(self, *group):
@@ -219,8 +230,8 @@ def select_skin_update(player):
     back = pygame.transform.scale(load_image('back.png'), (40, 40))
     screen.blit(back, (15, 14))
 
-    blue = pygame.transform.scale(load_image('blue_tank.png'), (90, 90))
-    red = pygame.transform.scale(load_image('red_tank.png'), (90, 90))
+    blue = pygame.transform.scale(load_image('blue_tank.png'), (90, 80))
+    red = pygame.transform.scale(load_image('red_tank.png'), (80, 90))
     green = pygame.transform.scale(load_image('green_tank.png'), (90, 90))
     screen.blit(blue, (200, height // 2 - 45))
     screen.blit(red, (400, height // 2 - 45))
@@ -406,7 +417,12 @@ bullet = Bullet(bullet_sprites)
 
 class First_tank(pygame.sprite.Sprite):
     image = load_image(f'{first_player}_tank.png')
-    image = pygame.transform.scale(image, (90, 90))
+    if first_player == 'blue':
+        image = pygame.transform.scale(image, (80, 70))
+    elif second_player == 'green':
+        image = pygame.transform.scale(image, (80, 80))
+    else:
+        image = pygame.transform.scale(image, (70, 80))
 
     def __init__(self, *group):
         super().__init__(*group)
@@ -423,7 +439,7 @@ class First_tank(pygame.sprite.Sprite):
         keystate = pygame.key.get_pressed()
         if keystate[pygame.K_a]:
             if not pygame.sprite.spritecollideany(self, left_st_wall):
-                self.speedx = -1
+                self.speedx = -SPEED
                 if self.direction == 'right':
                     self.image = pygame.transform.rotate(self.image, 180)
                 elif self.direction == 'up':
@@ -433,7 +449,7 @@ class First_tank(pygame.sprite.Sprite):
                 self.direction = 'left'
         if keystate[pygame.K_d]:
             if not pygame.sprite.spritecollideany(self, right_st_wall):
-                self.speedx = 1
+                self.speedx = SPEED
                 if self.direction == 'left':
                     self.image = pygame.transform.rotate(self.image, 180)
                 elif self.direction == 'up':
@@ -443,7 +459,7 @@ class First_tank(pygame.sprite.Sprite):
                 self.direction = 'right'
         if keystate[pygame.K_w]:
             if not pygame.sprite.spritecollideany(self, down_st_wall):
-                self.speedy = -1
+                self.speedy = -SPEED
                 if self.direction == 'down':
                     self.image = pygame.transform.rotate(self.image, 180)
                 elif self.direction == 'left':
@@ -453,7 +469,7 @@ class First_tank(pygame.sprite.Sprite):
                 self.direction = 'up'
         if keystate[pygame.K_s]:
             if not pygame.sprite.spritecollideany(self, up_st_wall):
-                self.speedy = 1
+                self.speedy = SPEED
                 if self.direction == 'up':
                     self.image = pygame.transform.rotate(self.image, 180)
                 elif self.direction == 'left':
@@ -521,7 +537,12 @@ class First_tank(pygame.sprite.Sprite):
 
 class Second_tank(pygame.sprite.Sprite):
     image = load_image(f'{second_player}_tank.png')
-    image = pygame.transform.scale(image, (90, 90))
+    if second_player == 'blue':
+        image = pygame.transform.scale(image, (80, 70))
+    elif second_player == 'green':
+        image = pygame.transform.scale(image, (80, 80))
+    else:
+        image = pygame.transform.scale(image, (70, 80))
     image = pygame.transform.rotate(image, 180)
 
     def __init__(self, *group):
@@ -539,7 +560,7 @@ class Second_tank(pygame.sprite.Sprite):
         keystate = pygame.key.get_pressed()
         if keystate[pygame.K_LEFT]:
             if not pygame.sprite.spritecollideany(self, left_st_wall):
-                self.speedx = -1
+                self.speedx = -SPEED
                 if self.direction == 'right':
                     self.image = pygame.transform.rotate(self.image, 180)
                 elif self.direction == 'up':
@@ -549,7 +570,7 @@ class Second_tank(pygame.sprite.Sprite):
                 self.direction = 'left'
         if keystate[pygame.K_RIGHT]:
             if not pygame.sprite.spritecollideany(self, right_st_wall):
-                self.speedx = 1
+                self.speedx = SPEED
                 if self.direction == 'left':
                     self.image = pygame.transform.rotate(self.image, 180)
                 elif self.direction == 'up':
@@ -559,7 +580,7 @@ class Second_tank(pygame.sprite.Sprite):
                 self.direction = 'right'
         if keystate[pygame.K_UP]:
             if not pygame.sprite.spritecollideany(self, down_st_wall):
-                self.speedy = -1
+                self.speedy = -SPEED
                 if self.direction == 'down':
                     self.image = pygame.transform.rotate(self.image, 180)
                 elif self.direction == 'left':
@@ -569,7 +590,7 @@ class Second_tank(pygame.sprite.Sprite):
                 self.direction = 'up'
         if keystate[pygame.K_DOWN]:
             if not pygame.sprite.spritecollideany(self, up_st_wall):
-                self.speedy = 1
+                self.speedy = SPEED
                 if self.direction == 'up':
                     self.image = pygame.transform.rotate(self.image, 180)
                 elif self.direction == 'left':
