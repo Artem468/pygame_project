@@ -536,6 +536,9 @@ class First_tank(pygame.sprite.Sprite):
                 self.fire_time = self.timer.get_ticks()
                 bullet = Bullet(bullet_sprites)
                 all_sprites.add(bullet_sprites)
+                my_sound = pygame.mixer.Sound('data/fire_sound.mp3')
+                my_sound.play()
+                my_sound.set_volume(0.6)
                 if self.direction == 'left':
                     bullet.rect.x = self.rect.x + self.image.get_width() // 2 - 67
                     bullet.rect.y = self.rect.y + self.image.get_height() // 2 - 5
@@ -652,6 +655,9 @@ class Second_tank(pygame.sprite.Sprite):
                 self.fire_time = self.timer.get_ticks()
                 bullet = Bullet(bullet_sprites)
                 all_sprites.add(bullet_sprites)
+                my_sound = pygame.mixer.Sound('data/fire_sound.mp3')
+                my_sound.play()
+                my_sound.set_volume(0.6)
                 if self.direction == 'left':
                     bullet.rect.x = self.rect.x + self.image.get_width() // 2 - 67
                     bullet.rect.y = self.rect.y + self.image.get_height() // 2 - 5
@@ -721,6 +727,10 @@ all_sprites.add(right_st_wall)
 all_sprites.add(left_st_wall)
 
 my_sound.stop()
+my_sound = pygame.mixer.Sound('data/dich.mp3')
+my_sound.play(-1)
+my_sound.set_volume(0.3)
+
 running = True
 while running:
     clock.tick(FPS)
