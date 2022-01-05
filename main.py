@@ -5,10 +5,10 @@ import sys
 pygame.init()
 size = width, height = 900, 900
 screen = pygame.display.set_mode(size)
-pygame.display.set_caption('PyGame project')
+pygame.display.set_caption('Танки v.2.0')
 FPS = 60
 TIME_RELOAD = 1500
-SPEED = 1
+SPEED = 3
 
 first_player = 'blue'
 second_player = 'red'
@@ -17,9 +17,9 @@ first_hp = 100
 second_hp = 100
 
 pygame.mixer.init()
-my_sound = pygame.mixer.Sound('data/sound_lobby.mp3')
-my_sound.play(-1)
-my_sound.set_volume(0.5)
+start_screen_sound = pygame.mixer.Sound('data/sound_lobby.mp3')
+start_screen_sound.play(-1)
+start_screen_sound.set_volume(0.5)
 
 all_sprites = pygame.sprite.Group()
 flag_tanks = False
@@ -486,8 +486,18 @@ class First_tank(pygame.sprite.Sprite):
         self.direction = 'up'
         self.timer = pygame.time
         self.fire_time = 0
+        self.drive_flag = False
+        global first_selff
+        first_selff = self
 
     def update(self, action):
+        if action == 'drive':
+            if not self.drive_flag:
+                global first_drive_sound
+                first_drive_sound = pygame.mixer.Sound('data/drive_sound.mp3')
+                first_drive_sound.play()
+                first_drive_sound.set_volume(0.3)
+                self.drive_flag = True
         self.speedx = 0
         self.speedy = 0
         keystate = pygame.key.get_pressed()
@@ -536,9 +546,9 @@ class First_tank(pygame.sprite.Sprite):
                 self.fire_time = self.timer.get_ticks()
                 bullet = Bullet(bullet_sprites)
                 all_sprites.add(bullet_sprites)
-                my_sound = pygame.mixer.Sound('data/fire_sound.mp3')
-                my_sound.play()
-                my_sound.set_volume(0.6)
+                fire_sound = pygame.mixer.Sound('data/fire_sound.mp3')
+                fire_sound.play()
+                fire_sound.set_volume(0.4)
                 if self.direction == 'left':
                     bullet.rect.x = self.rect.x + self.image.get_width() // 2 - 67
                     bullet.rect.y = self.rect.y + self.image.get_height() // 2 - 5
@@ -605,8 +615,18 @@ class Second_tank(pygame.sprite.Sprite):
         self.direction = 'down'
         self.timer = pygame.time
         self.fire_time = 0
+        self.drive_flag = False
+        global second_selff
+        second_selff = self
 
     def update(self, action):
+        if action == 'drive':
+            if not self.drive_flag:
+                global second_drive_sound
+                second_drive_sound = pygame.mixer.Sound('data/drive_sound.mp3')
+                second_drive_sound.play()
+                second_drive_sound.set_volume(0.3)
+                self.drive_flag = True
         self.speedx = 0
         self.speedy = 0
         keystate = pygame.key.get_pressed()
@@ -655,9 +675,9 @@ class Second_tank(pygame.sprite.Sprite):
                 self.fire_time = self.timer.get_ticks()
                 bullet = Bullet(bullet_sprites)
                 all_sprites.add(bullet_sprites)
-                my_sound = pygame.mixer.Sound('data/fire_sound.mp3')
-                my_sound.play()
-                my_sound.set_volume(0.6)
+                fire_sound = pygame.mixer.Sound('data/fire_sound.mp3')
+                fire_sound.play()
+                fire_sound.set_volume(0.4)
                 if self.direction == 'left':
                     bullet.rect.x = self.rect.x + self.image.get_width() // 2 - 67
                     bullet.rect.y = self.rect.y + self.image.get_height() // 2 - 5
@@ -710,7 +730,6 @@ class Second_tank(pygame.sprite.Sprite):
         if self.rect.bottom > 900:
             self.rect.bottom = 900
 
-
 level_map = load_level("map.map")
 generate_level(level_map)
 
@@ -726,11 +745,7 @@ all_sprites.add(down_st_wall)
 all_sprites.add(right_st_wall)
 all_sprites.add(left_st_wall)
 
-my_sound.stop()
-my_sound = pygame.mixer.Sound('data/dich.mp3')
-my_sound.play(-1)
-my_sound.set_volume(0.3)
-
+start_screen_sound.stop()
 running = True
 while running:
     clock.tick(FPS)
@@ -740,28 +755,24 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_w:
-                first_sprites.update('up')
-            elif event.key == pygame.K_UP:
-                second_sprites.update('up')
-            elif event.key == pygame.K_s:
-                first_sprites.update('down')
-            elif event.key == pygame.K_DOWN:
-                second_sprites.update('down')
-            elif event.key == pygame.K_a:
-                first_sprites.update('left')
-            elif event.key == pygame.K_LEFT:
-                second_sprites.update('left')
-            elif event.key == pygame.K_d:
-                first_sprites.update('right')
-            elif event.key == pygame.K_RIGHT:
-                second_sprites.update('right')
-            elif event.key == pygame.K_LSHIFT:
+            if event.key == pygame.K_w or event.key == pygame.K_s or event.key == pygame.K_a or event.key == pygame.K_d:
+                first_sprites.update('drive')
+                first_selff.drive_flag = True
+            if event.key == pygame.K_UP or event.key == pygame.K_DOWN or event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
+                second_sprites.update('drive')
+                second_selff.drive_flag = True
+            if event.key == pygame.K_LSHIFT:
                 first_sprites.update('fire')
-            elif event.key == pygame.K_RSHIFT:
+            if event.key == pygame.K_RSHIFT:
                 second_sprites.update('fire')
+        elif event.type == pygame.KEYUP:
+            if event.key == pygame.K_w or event.key == pygame.K_s or event.key == pygame.K_a or event.key == pygame.K_d:
+                first_drive_sound.stop()
+                first_selff.drive_flag = False
+            if event.key == pygame.K_UP or event.key == pygame.K_DOWN or event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
+                second_drive_sound.stop()
+                second_selff.drive_flag = False
     bullet_sprites.update()
     all_sprites.draw(screen)
-
     pygame.display.flip()
 pygame.quit()
