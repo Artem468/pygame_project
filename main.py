@@ -387,6 +387,8 @@ class Bullet(pygame.sprite.Sprite):
         self.direction = 'up'
         self.speed = 5
         self.flag = False
+        self.timer = pygame.time
+        self.flag_im = True
 
     def update(self):
         if self.flag:
@@ -405,17 +407,59 @@ class Bullet(pygame.sprite.Sprite):
                                     elif self.direction == 'right':
                                         self.rect.x += self.speed
                                 else:
-                                    self.rect.x, self.rect.y = -100, -100
+                                    if self.flag_im:
+                                        im = load_image('boom.png', -1)
+                                        im = pygame.transform.scale(im, (85, 75))
+                                        self.image = im
+                                        self.time = self.timer.get_ticks()
+                                        self.flag_im = False
+                                    if self.timer.get_ticks() - self.time >= 500:
+                                        self.rect.x, self.rect.y = -100, -100
                             else:
-                                self.rect.x, self.rect.y = -100, -100
+                                if self.flag_im:
+                                    im = load_image('boom.png')
+                                    im = pygame.transform.scale(im, (85, 75))
+                                    self.image = im
+                                    time = self.timer.get_ticks()
+                                    self.flag_im = False
+                                if self.timer.get_ticks() - time >= 500:
+                                    self.rect.x, self.rect.y = -100, -100
                         else:
-                            self.rect.x, self.rect.y = -100, -100
+                            if self.flag_im:
+                                im = load_image('boom.png')
+                                im = pygame.transform.scale(im, (30, 20))
+                                self.image = im
+                                time = self.timer.get_ticks()
+                                self.flag_im = False
+                            if self.timer.get_ticks() - time >= 500:
+                                self.rect.x, self.rect.y = -100, -100
                     else:
-                        self.rect.x, self.rect.y = -100, -100
+                        if self.flag_im:
+                            im = load_image('boom.png')
+                            im = pygame.transform.scale(im, (30, 20))
+                            self.image = im
+                            time = self.timer.get_ticks()
+                            self.flag_im = False
+                        if self.timer.get_ticks() - time >= 500:
+                            self.rect.x, self.rect.y = -100, -100
                 else:
-                    self.rect.x, self.rect.y = -100, -100
+                    if self.flag_im:
+                        im = load_image('boom.png')
+                        im = pygame.transform.scale(im, (30, 20))
+                        self.image = im
+                        time = self.timer.get_ticks()
+                        self.flag_im = False
+                    if self.timer.get_ticks() - time >= 500:
+                        self.rect.x, self.rect.y = -100, -100
             else:
-                self.rect.x, self.rect.y = -100, -1
+                if self.flag_im:
+                    im = load_image('boom.png')
+                    im = pygame.transform.scale(im, (30, 20))
+                    self.image = im
+                    time = self.timer.get_ticks()
+                    self.flag_im = False
+                if self.timer.get_ticks() - time >= 500:
+                    self.rect.x, self.rect.y = -100, -100
         if self.rect.x > 900:
             self.flag = False
         elif self.rect.x < -35:
