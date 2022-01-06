@@ -448,11 +448,12 @@ class Bullet(pygame.sprite.Sprite):
                                         self.flag = True
                                         if self.direction == 'up' or self.direction == 'down':
                                             cells = round(abs(self.y1 - self.rect.y) / 90)
-                                            print(cells)
                                         else:
                                             cells = round(abs(self.x1 - self.rect.x) / 90)
-                                            print(cells)
+                                        hit_random = random.choice([0, 50, 100])
+                                        print(hit_random)
                                         hit_hp = 100 - cells * 10
+                                        hit_hp = hit_random * hit_hp // 100
                                         global second_hp
                                         second_hp -= hit_hp
                                         if self.direction == 'left':
@@ -474,11 +475,12 @@ class Bullet(pygame.sprite.Sprite):
                                     self.flag = True
                                     if self.direction == 'up' or self.direction == 'down':
                                         cells = round(abs(self.y1 - self.rect.y) / 90)
-                                        print(cells)
                                     else:
                                         cells = round(abs(self.x1 - self.rect.x) / 90)
-                                        print(cells)
+                                    hit_random = random.choice([0, 50, 100])
+                                    print(hit_random)
                                     hit_hp = 100 - cells * 10
+                                    hit_hp = hit_random * hit_hp // 100
                                     global first_hp
                                     first_hp -= hit_hp
                                     if self.direction == 'left':
