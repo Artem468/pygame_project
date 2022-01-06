@@ -375,6 +375,12 @@ clock = pygame.time.Clock()
 start_screen()
 
 
+def bullet_move(self):
+    if self.timer.get_ticks() - self.time >= 500:
+        self.rect.x, self.rect.y = -100, -100
+        self.flag = False
+
+
 class Bullet(pygame.sprite.Sprite):
     image = load_image('bullet.png')
     image = pygame.transform.scale(image, (15, 35))
@@ -385,13 +391,16 @@ class Bullet(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = -100, -100
         self.direction = 'up'
-        self.speed = 5
-        self.flag = False
+        self.speed = 6
+        self.flag_move = False
         self.timer = pygame.time
         self.flag_im = True
+        self.flag = False
 
     def update(self):
         if self.flag:
+            bullet_move(self)
+        if self.flag_move:
             if not pygame.sprite.spritecollideany(self, left_st_wall):
                 if not pygame.sprite.spritecollideany(self, right_st_wall):
                     if not pygame.sprite.spritecollideany(self, up_st_wall):
@@ -413,8 +422,16 @@ class Bullet(pygame.sprite.Sprite):
                                         self.image = im
                                         self.time = self.timer.get_ticks()
                                         self.flag_im = False
-                                    if self.timer.get_ticks() - self.time >= 500:
-                                        self.rect.x, self.rect.y = -100, -100
+                                        self.flag_move = False
+                                        self.flag = True
+                                        if self.direction == 'left':
+                                            self.rect.move_ip(-35, -30)
+                                        elif self.direction == 'right':
+                                            self.rect.move_ip(-30, -25)
+                                        elif self.direction == 'up':
+                                            self.rect.move_ip(-30, -30)
+                                        elif self.direction == 'down':
+                                            self.rect.move_ip(-30, 0)
                             else:
                                 if self.flag_im:
                                     im = load_image('boom.png')
@@ -422,8 +439,16 @@ class Bullet(pygame.sprite.Sprite):
                                     self.image = im
                                     self.time = self.timer.get_ticks()
                                     self.flag_im = False
-                                if self.timer.get_ticks() - self.time >= 500:
-                                    self.rect.x, self.rect.y = -100, -100
+                                    self.flag_move = False
+                                    self.flag = True
+                                    if self.direction == 'left':
+                                        self.rect.move_ip(-35, -30)
+                                    elif self.direction == 'right':
+                                        self.rect.move_ip(-30, -25)
+                                    elif self.direction == 'up':
+                                        self.rect.move_ip(-30, -30)
+                                    elif self.direction == 'down':
+                                        self.rect.move_ip(-30, 0)
                         else:
                             if self.flag_im:
                                 im = load_image('boom.png')
@@ -431,8 +456,9 @@ class Bullet(pygame.sprite.Sprite):
                                 self.image = im
                                 self.time = self.timer.get_ticks()
                                 self.flag_im = False
-                            if self.timer.get_ticks() - self.time >= 500:
-                                self.rect.x, self.rect.y = -100, -100
+                                self.flag_move = False
+                                self.flag = True
+                                self.rect.move_ip(-10, 10)
                     else:
                         if self.flag_im:
                             im = load_image('boom.png')
@@ -440,8 +466,9 @@ class Bullet(pygame.sprite.Sprite):
                             self.image = im
                             self.time = self.timer.get_ticks()
                             self.flag_im = False
-                        if self.timer.get_ticks() - self.time >= 500:
-                            self.rect.x, self.rect.y = -100, -100
+                            self.flag_move = False
+                            self.flag = True
+                            self.rect.move_ip(-15, 15)
                 else:
                     if self.flag_im:
                         im = load_image('boom.png')
@@ -449,8 +476,9 @@ class Bullet(pygame.sprite.Sprite):
                         self.image = im
                         self.time = self.timer.get_ticks()
                         self.flag_im = False
-                    if self.timer.get_ticks() - self.time >= 500:
-                        self.rect.x, self.rect.y = -100, -100
+                        self.flag_move = False
+                        self.flag = True
+                        self.rect.move_ip(-10, -10)
             else:
                 if self.flag_im:
                     im = load_image('boom.png')
@@ -458,16 +486,18 @@ class Bullet(pygame.sprite.Sprite):
                     self.image = im
                     self.time = self.timer.get_ticks()
                     self.flag_im = False
-                if self.timer.get_ticks() - self.time >= 500:
-                    self.rect.x, self.rect.y = -100, -100
+                    self.flag_move = False
+                    self.flag = True
+                    self.rect.move_ip(-20, -10)
+
         if self.rect.x > 900:
-            self.flag = False
+            self.flag_move = False
         elif self.rect.x < -35:
-            self.flag = False
+            self.flag_move = False
         elif self.rect.y > 900:
-            self.flag = False
+            self.flag_move = False
         elif self.rect.y < -40:
-            self.flag = False
+            self.flag_move = False
 
 
 bullet_sprites = pygame.sprite.Group()
@@ -476,7 +506,7 @@ bullet = Bullet(bullet_sprites)
 
 class First_tank(pygame.sprite.Sprite):
     image = load_image(f'{first_player}_tank.png')
-    image = pygame.transform.scale(image, (85, 85))
+    image = pygame.transform.scale(image, (80, 80))
 
     def __init__(self, *group):
         super().__init__(*group)
@@ -589,7 +619,7 @@ class First_tank(pygame.sprite.Sprite):
                     elif bullet.direction == 'right':
                         bullet.image = pygame.transform.rotate(bullet.image, 270)
                     bullet.direction = 'down'
-                bullet.flag = True
+                bullet.flag_move = True
         self.rect.y += self.speedy
         self.rect.x += self.speedx
         if self.rect.right > 900:
@@ -604,7 +634,7 @@ class First_tank(pygame.sprite.Sprite):
 
 class Second_tank(pygame.sprite.Sprite):
     image = load_image(f'{second_player}_tank.png')
-    image = pygame.transform.scale(image, (85, 85))
+    image = pygame.transform.scale(image, (80, 80))
     image = pygame.transform.rotate(image, 180)
 
     def __init__(self, *group):
@@ -718,7 +748,7 @@ class Second_tank(pygame.sprite.Sprite):
                     elif bullet.direction == 'right':
                         bullet.image = pygame.transform.rotate(bullet.image, 270)
                     bullet.direction = 'down'
-                bullet.flag = True
+                bullet.flag_move = True
         self.rect.y += self.speedy
         self.rect.x += self.speedx
         if self.rect.right > 900:
@@ -746,6 +776,8 @@ all_sprites.add(right_st_wall)
 all_sprites.add(left_st_wall)
 
 start_screen_sound.stop()
+first_pushed_buttons = 0
+second_pushed_buttons = 0
 running = True
 while running:
     clock.tick(FPS)
@@ -758,20 +790,26 @@ while running:
             if event.key == pygame.K_w or event.key == pygame.K_s or event.key == pygame.K_a or event.key == pygame.K_d:
                 first_sprites.update('drive')
                 first_selff.drive_flag = True
+                first_pushed_buttons += 1
             if event.key == pygame.K_UP or event.key == pygame.K_DOWN or event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                 second_sprites.update('drive')
                 second_selff.drive_flag = True
+                second_pushed_buttons += 1
             if event.key == pygame.K_LSHIFT:
                 first_sprites.update('fire')
             if event.key == pygame.K_RSHIFT:
                 second_sprites.update('fire')
         elif event.type == pygame.KEYUP:
             if event.key == pygame.K_w or event.key == pygame.K_s or event.key == pygame.K_a or event.key == pygame.K_d:
-                first_drive_sound.stop()
-                first_selff.drive_flag = False
+                first_pushed_buttons -= 1
+                if first_pushed_buttons == 0:
+                    first_drive_sound.stop()
+                    first_selff.drive_flag = False
             if event.key == pygame.K_UP or event.key == pygame.K_DOWN or event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
-                second_drive_sound.stop()
-                second_selff.drive_flag = False
+                second_pushed_buttons -= 1
+                if second_pushed_buttons == 0:
+                    second_drive_sound.stop()
+                    second_selff.drive_flag = False
     bullet_sprites.update()
     all_sprites.draw(screen)
     pygame.display.flip()
