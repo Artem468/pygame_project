@@ -606,7 +606,7 @@ class Bullet(pygame.sprite.Sprite):
                                 self.flag_im = False
                                 self.flag_move = False
                                 self.flag = True
-                                self.rect.move_ip(-10, 10)
+                                self.rect.move_ip(-10, -10)
                     else:
                         if self.flag_im:
                             im = load_image('boom.png')
