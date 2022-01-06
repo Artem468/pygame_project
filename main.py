@@ -1,6 +1,7 @@
 import pygame
 import os
 import sys
+import random
 
 pygame.init()
 size = width, height = 900, 900
@@ -375,6 +376,26 @@ clock = pygame.time.Clock()
 start_screen()
 
 
+def print_health():
+    font = pygame.font.Font(r'data\teletactile.ttf', 60)
+    text_coord = width // 4
+    string_rendered = font.render(str(first_hp), True, pygame.Color(first_player))
+    intro_rect = string_rendered.get_rect()
+    text_coord -= string_rendered.get_width() // 2
+    intro_rect.top = 20
+    intro_rect.x = text_coord
+    screen.blit(string_rendered, intro_rect)
+
+    font = pygame.font.Font(r'data\teletactile.ttf', 60)
+    text_coord = width // 2 + width // 4
+    string_rendered = font.render(str(second_hp), True, pygame.Color(second_player))
+    intro_rect = string_rendered.get_rect()
+    text_coord -= string_rendered.get_width() // 2
+    intro_rect.top = 20
+    intro_rect.x = text_coord
+    screen.blit(string_rendered, intro_rect)
+
+
 def bullet_move(self):
     if self.timer.get_ticks() - self.time >= 500:
         self.rect.x, self.rect.y = -100, -100
@@ -396,6 +417,7 @@ class Bullet(pygame.sprite.Sprite):
         self.timer = pygame.time
         self.flag_im = True
         self.flag = False
+        self.x1, self.y1 = 0, 0
 
     def update(self):
         if self.flag:
@@ -424,6 +446,15 @@ class Bullet(pygame.sprite.Sprite):
                                         self.flag_im = False
                                         self.flag_move = False
                                         self.flag = True
+                                        if self.direction == 'up' or self.direction == 'down':
+                                            cells = round(abs(self.y1 - self.rect.y) / 90)
+                                            print(cells)
+                                        else:
+                                            cells = round(abs(self.x1 - self.rect.x) / 90)
+                                            print(cells)
+                                        hit_hp = 100 - cells * 10
+                                        global second_hp
+                                        second_hp -= hit_hp
                                         if self.direction == 'left':
                                             self.rect.move_ip(-35, -30)
                                         elif self.direction == 'right':
@@ -441,6 +472,15 @@ class Bullet(pygame.sprite.Sprite):
                                     self.flag_im = False
                                     self.flag_move = False
                                     self.flag = True
+                                    if self.direction == 'up' or self.direction == 'down':
+                                        cells = round(abs(self.y1 - self.rect.y) / 90)
+                                        print(cells)
+                                    else:
+                                        cells = round(abs(self.x1 - self.rect.x) / 90)
+                                        print(cells)
+                                    hit_hp = 100 - cells * 10
+                                    global first_hp
+                                    first_hp -= hit_hp
                                     if self.direction == 'left':
                                         self.rect.move_ip(-35, -30)
                                     elif self.direction == 'right':
@@ -582,6 +622,8 @@ class First_tank(pygame.sprite.Sprite):
                 if self.direction == 'left':
                     bullet.rect.x = self.rect.x + self.image.get_width() // 2 - 67
                     bullet.rect.y = self.rect.y + self.image.get_height() // 2 - 5
+                    bullet.x1 = self.rect.x + self.image.get_width() // 2 - 67
+                    bullet.y1 = self.rect.y + self.image.get_height() // 2 - 5
                     if bullet.direction == 'right':
                         bullet.image = pygame.transform.rotate(bullet.image, 180)
                     elif bullet.direction == 'up':
@@ -592,6 +634,8 @@ class First_tank(pygame.sprite.Sprite):
                 if self.direction == 'right':
                     bullet.rect.x = self.rect.x + self.image.get_width() // 2 + 45
                     bullet.rect.y = self.rect.y + self.image.get_height() // 2 - 7
+                    bullet.x1 = self.rect.x + self.image.get_width() // 2 + 45
+                    bullet.y1 = self.rect.y + self.image.get_height() // 2 - 7
                     if bullet.direction == 'left':
                         bullet.image = pygame.transform.rotate(bullet.image, 180)
                     elif bullet.direction == 'up':
@@ -602,6 +646,8 @@ class First_tank(pygame.sprite.Sprite):
                 if self.direction == 'up':
                     bullet.rect.x = self.rect.x + self.image.get_width() // 2 - 6
                     bullet.rect.y = self.rect.y + self.image.get_height() // 2 - 78
+                    bullet.x1 = self.rect.x + self.image.get_width() // 2 - 6
+                    bullet.y1 = self.rect.y + self.image.get_height() // 2 - 78
                     if bullet.direction == 'down':
                         bullet.image = pygame.transform.rotate(bullet.image, 180)
                     elif bullet.direction == 'left':
@@ -612,6 +658,8 @@ class First_tank(pygame.sprite.Sprite):
                 if self.direction == 'down':
                     bullet.rect.x = self.rect.x + self.image.get_width() // 2 - 7
                     bullet.rect.y = self.rect.y + self.image.get_height() // 2 + 45
+                    bullet.x1 = self.rect.x + self.image.get_width() // 2 - 7
+                    bullet.y1 = self.rect.y + self.image.get_height() // 2 + 45
                     if bullet.direction == 'up':
                         bullet.image = pygame.transform.rotate(bullet.image, 180)
                     elif bullet.direction == 'left':
@@ -711,6 +759,8 @@ class Second_tank(pygame.sprite.Sprite):
                 if self.direction == 'left':
                     bullet.rect.x = self.rect.x + self.image.get_width() // 2 - 67
                     bullet.rect.y = self.rect.y + self.image.get_height() // 2 - 5
+                    bullet.x1 = self.rect.x + self.image.get_width() // 2 - 67
+                    bullet.y1 = self.rect.y + self.image.get_height() // 2 - 5
                     if bullet.direction == 'right':
                         bullet.image = pygame.transform.rotate(bullet.image, 180)
                     elif bullet.direction == 'up':
@@ -721,6 +771,8 @@ class Second_tank(pygame.sprite.Sprite):
                 if self.direction == 'right':
                     bullet.rect.x = self.rect.x + self.image.get_width() // 2 + 45
                     bullet.rect.y = self.rect.y + self.image.get_height() // 2 - 7
+                    bullet.x1 = self.rect.x + self.image.get_width() // 2 + 45
+                    bullet.y1 = self.rect.y + self.image.get_height() // 2 - 7
                     if bullet.direction == 'left':
                         bullet.image = pygame.transform.rotate(bullet.image, 180)
                     elif bullet.direction == 'up':
@@ -731,6 +783,8 @@ class Second_tank(pygame.sprite.Sprite):
                 if self.direction == 'up':
                     bullet.rect.x = self.rect.x + self.image.get_width() // 2 - 6
                     bullet.rect.y = self.rect.y + self.image.get_height() // 2 - 78
+                    bullet.x1 = self.rect.x + self.image.get_width() // 2 - 6
+                    bullet.y1 = self.rect.y + self.image.get_height() // 2 - 78
                     if bullet.direction == 'down':
                         bullet.image = pygame.transform.rotate(bullet.image, 180)
                     elif bullet.direction == 'left':
@@ -741,6 +795,8 @@ class Second_tank(pygame.sprite.Sprite):
                 if self.direction == 'down':
                     bullet.rect.x = self.rect.x + self.image.get_width() // 2 - 7
                     bullet.rect.y = self.rect.y + self.image.get_height() // 2 + 45
+                    bullet.x1 = self.rect.x + self.image.get_width() // 2 - 7
+                    bullet.y1 = self.rect.y + self.image.get_height() // 2 + 45
                     if bullet.direction == 'up':
                         bullet.image = pygame.transform.rotate(bullet.image, 180)
                     elif bullet.direction == 'left':
@@ -760,9 +816,12 @@ class Second_tank(pygame.sprite.Sprite):
         if self.rect.bottom > 900:
             self.rect.bottom = 900
 
-level_map = load_level("map.map")
-generate_level(level_map)
 
+def fight_screen_update():
+    level_map = load_level("map.map")
+    generate_level(level_map)
+
+fight_screen_update()
 first_sprites = pygame.sprite.Group()
 First_tank(first_sprites)
 second_sprites = pygame.sprite.Group()
@@ -781,8 +840,6 @@ second_pushed_buttons = 0
 running = True
 while running:
     clock.tick(FPS)
-    first_sprites.update(None)
-    second_sprites.update(None)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -810,7 +867,10 @@ while running:
                 if second_pushed_buttons == 0:
                     second_drive_sound.stop()
                     second_selff.drive_flag = False
+    first_sprites.update(None)
+    second_sprites.update(None)
     bullet_sprites.update()
     all_sprites.draw(screen)
+    print_health()
     pygame.display.flip()
 pygame.quit()
