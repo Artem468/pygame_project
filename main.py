@@ -7,30 +7,27 @@ pygame.init()
 size = width, height = 900, 900
 screen = pygame.display.set_mode(size)
 pygame.display.set_caption('Танки v.2.0')
-FPS = 60
-TIME_RELOAD = 1500
-SPEED = 1
-
-first_player = 'blue'
-second_player = 'red'
-
-first_hp = 100
-second_hp = 100
-
-replay = False
-
+clock = pygame.time.Clock()
 pygame.mixer.init()
-start_screen_sound = pygame.mixer.Sound('data/sound_lobby.mp3')
-start_screen_sound.play(-1)
-start_screen_sound.set_volume(0.5)
 
 all_sprites = pygame.sprite.Group()
-flag_tanks = False
-
+first_preview_sprites = pygame.sprite.Group()
+second_preview_sprites = pygame.sprite.Group()
 right_st_wall = pygame.sprite.Group()
 left_st_wall = pygame.sprite.Group()
 up_st_wall = pygame.sprite.Group()
 down_st_wall = pygame.sprite.Group()
+
+flag_finish = ''
+flag_tanks = False
+FPS = 60
+TIME_RELOAD = 1500
+SPEED = 1
+first_player = 'blue'
+second_player = 'red'
+first_hp = 100
+second_hp = 100
+replay = False
 
 
 def terminate():
@@ -86,8 +83,6 @@ class Sprite(pygame.sprite.Sprite):
 
 
 player = None
-running = True
-clock = pygame.time.Clock()
 sprite_group = SpriteGroup()
 
 
@@ -161,10 +156,10 @@ def tanks_preview_update():
     if flag_tanks:
         tank1.rect.x = -200
         tank2.rect.x = 1100
-        tank1 = First_tank_preview(all_sprites)
+        tank1 = First_tank_preview(first_preview_sprites)
+        tank2 = Second_tank_preview(second_preview_sprites)
         tank1.rect.x = -90
         tank2.rect.x = 900
-        print(first_player, second_player)
         im = load_image(f'{first_player}_tank.png')
         im = pygame.transform.scale(im, (90, 90))
         im = pygame.transform.rotate(im, 270)
@@ -174,8 +169,8 @@ def tanks_preview_update():
         im = pygame.transform.rotate(im, 90)
         tank2.image = im
     else:
-        tank1 = First_tank_preview(all_sprites)
-        tank2 = Second_tank_preview(all_sprites)
+        tank1 = First_tank_preview(first_preview_sprites)
+        tank2 = Second_tank_preview(second_preview_sprites)
         flag_tanks = True
 
 
@@ -346,6 +341,9 @@ def start_screen_update():
 def start_screen():
     start_screen_update()
     tanks_preview_update()
+    start_screen_sound = pygame.mixer.Sound('data/sound_lobby.mp3')
+    start_screen_sound.play(-1)
+    start_screen_sound.set_volume(0.5)
     while True:
         clock.tick(FPS)
         for event in pygame.event.get():
@@ -356,7 +354,13 @@ def start_screen():
                     if event.pos[1] >= 300 and event.pos[1] <= 350:
                         tank1.rect.x = -200
                         tank2.rect.x = -200
-                        return
+                        start_screen_sound.stop()
+                        main()
+                        start_screen_update()
+                        tanks_preview_update()
+                        start_screen_sound = pygame.mixer.Sound('data/sound_lobby.mp3')
+                        start_screen_sound.play(-1)
+                        start_screen_sound.set_volume(0.5)
                 if event.pos[0] >= 180 and event.pos[0] <= 440:
                     if event.pos[1] >= 400 and event.pos[1] <= 435:
                         select_skin('1st player')
@@ -370,12 +374,9 @@ def start_screen():
         start_screen_update()
         tank1.update()
         tank2.update()
-        all_sprites.draw(screen)
+        first_preview_sprites.draw(screen)
+        second_preview_sprites.draw(screen)
         pygame.display.flip()
-
-
-clock = pygame.time.Clock()
-start_screen()
 
 
 def print_health():
@@ -400,20 +401,20 @@ def print_health():
 
 def finish_screen(player):
     screen.fill((0, 0, 0))
-    font = pygame.font.Font(r'data\teletactile.ttf', 60)
+    font = pygame.font.Font(r'data\teletactile.ttf', 50)
     text_coord = width // 2
     if player == 'First player':
-        string_rendered = font.render(f'Win: {player}', True, pygame.Color(first_player))
+        string_rendered = font.render(f'Winer: {player}', True, pygame.Color(first_player))
     else:
-        string_rendered = font.render(f'Win: {player}', True, pygame.Color(second_player))
+        string_rendered = font.render(f'Winer: {player}', True, pygame.Color(second_player))
     intro_rect = string_rendered.get_rect()
     text_coord -= string_rendered.get_width() // 2
     intro_rect.top = height // 2 - font.get_height() // 2 - 100
     intro_rect.x = text_coord
     screen.blit(string_rendered, intro_rect)
 
-    pygame.draw.rect(screen, 'green', (300, 550, 300, 55))
-    font = pygame.font.Font(r'data\teletactile.ttf', 60)
+    pygame.draw.rect(screen, 'green', (300, 550, 255, 45))
+    font = pygame.font.Font(r'data\teletactile.ttf', 50)
     string_rendered = font.render('Finish', True, pygame.Color('black'))
     intro_rect = string_rendered.get_rect()
     intro_rect.x = 305
@@ -427,7 +428,7 @@ def finish_screen(player):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.pos[0] >= 300 and event.pos[0] <= 600:
                     if event.pos[1] >= 550 and event.pos[1] <= 605:
-                        terminate()
+                        return
         pygame.display.flip()
 
 
@@ -458,7 +459,7 @@ class Bullet(pygame.sprite.Sprite):
         if self.flag:
             bullet_move(self)
         if self.flag_move:
-            global running
+            global running, flag_finish
             if not pygame.sprite.spritecollideany(self, left_st_wall):
                 if not pygame.sprite.spritecollideany(self, right_st_wall):
                     if not pygame.sprite.spritecollideany(self, up_st_wall):
@@ -525,8 +526,7 @@ class Bullet(pygame.sprite.Sprite):
                                             boom_sound = pygame.mixer.Sound('data/boom_tank.mp3')
                                             boom_sound.play()
                                             boom_sound.set_volume(0.4)
-                                            finish_screen('First player')
-                                            running = False
+                                            flag_finish = 'First player'
                                         if self.direction == 'left':
                                             self.rect.move_ip(-35, -30)
                                         elif self.direction == 'right':
@@ -587,8 +587,7 @@ class Bullet(pygame.sprite.Sprite):
                                         boom_sound = pygame.mixer.Sound('data/boom_tank.mp3')
                                         boom_sound.play()
                                         boom_sound.set_volume(0.4)
-                                        finish_screen('Second player')
-                                        running = False
+                                        flag_finish = 'Second player'
                                     if self.direction == 'left':
                                         self.rect.move_ip(-35, -30)
                                     elif self.direction == 'right':
@@ -672,9 +671,9 @@ class First_tank(pygame.sprite.Sprite):
         if action == 'drive':
             if not self.drive_flag:
                 global first_drive_sound
-                first_drive_sound = pygame.mixer.Sound('data/drive_sound.mp3')
-                first_drive_sound.play()
-                first_drive_sound.set_volume(0.3)
+                self.first_drive_sound = pygame.mixer.Sound('data/drive_sound.mp3')
+                self.first_drive_sound.play()
+                self.first_drive_sound.set_volume(0.3)
                 self.drive_flag = True
         self.speedx = 0
         self.speedy = 0
@@ -809,9 +808,9 @@ class Second_tank(pygame.sprite.Sprite):
         if action == 'drive':
             if not self.drive_flag:
                 global second_drive_sound
-                second_drive_sound = pygame.mixer.Sound('data/drive_sound.mp3')
-                second_drive_sound.play()
-                second_drive_sound.set_volume(0.3)
+                self.second_drive_sound = pygame.mixer.Sound('data/drive_sound.mp3')
+                self.second_drive_sound.play()
+                self.second_drive_sound.set_volume(0.3)
                 self.drive_flag = True
         self.speedx = 0
         self.speedy = 0
@@ -930,13 +929,19 @@ def fight_screen_update():
     generate_level(level_map)
 
 
-first_sprites = pygame.sprite.Group()
-First_tank(first_sprites)
-second_sprites = pygame.sprite.Group()
-Second_tank(second_sprites)
-
-
 def main():
+    global first_sprites, second_sprites
+    first_sprites = pygame.sprite.Group()
+    first_tank = First_tank(first_sprites)
+    im = load_image(f'{first_player}_tank.png')
+    im = pygame.transform.scale(im, (80, 80))
+    first_tank.image = im
+    second_sprites = pygame.sprite.Group()
+    second_tank = Second_tank(second_sprites)
+    im = load_image(f'{second_player}_tank.png')
+    im = pygame.transform.scale(im, (80, 80))
+    im = pygame.transform.rotate(im, 180)
+    second_tank.image = im
     fight_screen_update()
     all_sprites.add(sprite_group)
     all_sprites.add(first_sprites)
@@ -946,16 +951,27 @@ def main():
     all_sprites.add(right_st_wall)
     all_sprites.add(left_st_wall)
 
-    start_screen_sound.stop()
     first_pushed_buttons = 0
     second_pushed_buttons = 0
-    global running
+    global running, flag_finish, first_hp, second_hp
     running = True
     while running:
         clock.tick(FPS)
+        if flag_finish:
+            first_selff.first_drive_sound.stop()
+            second_selff.second_drive_sound.stop()
+            finish_screen(flag_finish)
+            flag_finish = ''
+            first_hp = 100
+            second_hp = 100
+            return
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.pos[0] >= 15 and event.pos[0] <= 55:
+                    if event.pos[1] >= 15 and event.pos[1] <= 55:
+                        return
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_w or event.key == pygame.K_s or event.key == pygame.K_a or event.key == pygame.K_d:
                     first_sprites.update('drive')
@@ -973,20 +989,23 @@ def main():
                 if event.key == pygame.K_w or event.key == pygame.K_s or event.key == pygame.K_a or event.key == pygame.K_d:
                     first_pushed_buttons -= 1
                     if first_pushed_buttons == 0:
-                        first_drive_sound.stop()
+                        first_selff.first_drive_sound.stop()
                         first_selff.drive_flag = False
                 if event.key == pygame.K_UP or event.key == pygame.K_DOWN or event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                     second_pushed_buttons -= 1
                     if second_pushed_buttons == 0:
-                        second_drive_sound.stop()
+                        second_selff.second_drive_sound.stop()
                         second_selff.drive_flag = False
         first_sprites.update(None)
         second_sprites.update(None)
         bullet_sprites.update()
         all_sprites.draw(screen)
         print_health()
+        pygame.draw.rect(screen, 'grey', (15, 15, 40, 40))
+        back = pygame.transform.scale(load_image('back.png'), (40, 40))
+        screen.blit(back, (15, 14))
         pygame.display.flip()
     terminate()
 
 
-main()
+start_screen()
