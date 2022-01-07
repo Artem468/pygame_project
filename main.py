@@ -480,7 +480,7 @@ class Bullet(pygame.sprite.Sprite):
                                             cells = round(abs(self.y1 - self.rect.y) / 90)
                                         else:
                                             cells = round(abs(self.x1 - self.rect.x) / 90)
-                                        hit_random = random.choice([0, 50, 100])
+                                        hit_random = random.choice([0, 50, 50, 100])
                                         if hit_random == 100:
                                             im = load_image('boom.png', -1)
                                             im = pygame.transform.scale(im, (85, 75))
@@ -541,7 +541,7 @@ class Bullet(pygame.sprite.Sprite):
                                         cells = round(abs(self.y1 - self.rect.y) / 90)
                                     else:
                                         cells = round(abs(self.x1 - self.rect.x) / 90)
-                                    hit_random = random.choice([0, 50, 100])
+                                    hit_random = random.choice([0, 50, 50, 100])
                                     if hit_random == 100:
                                         im = load_image('boom.png', -1)
                                         im = pygame.transform.scale(im, (85, 75))
