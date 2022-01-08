@@ -695,9 +695,9 @@ class First_tank(pygame.sprite.Sprite):
         if action == 'drive':
             if not self.drive_flag:
                 global first_drive_sound
-                self.first_drive_sound = pygame.mixer.Sound('data/drive_sound.mp3')
-                self.first_drive_sound.play()
-                self.first_drive_sound.set_volume(0.3)
+                first_drive_sound = pygame.mixer.Sound('data/drive_sound.mp3')
+                first_drive_sound.play()
+                first_drive_sound.set_volume(0.3)
                 self.drive_flag = True
         self.speedx = 0
         self.speedy = 0
@@ -832,9 +832,9 @@ class Second_tank(pygame.sprite.Sprite):
         if action == 'drive':
             if not self.drive_flag:
                 global second_drive_sound
-                self.second_drive_sound = pygame.mixer.Sound('data/drive_sound.mp3')
-                self.second_drive_sound.play()
-                self.second_drive_sound.set_volume(0.3)
+                second_drive_sound = pygame.mixer.Sound('data/drive_sound.mp3')
+                second_drive_sound.play()
+                second_drive_sound.set_volume(0.3)
                 self.drive_flag = True
         self.speedx = 0
         self.speedy = 0
@@ -982,8 +982,8 @@ def main():
     while running:
         clock.tick(FPS)
         if flag_finish:
-            first_selff.first_drive_sound.stop()
-            second_selff.second_drive_sound.stop()
+            first_drive_sound.stop()
+            second_drive_sound.stop()
             finish_screen(flag_finish)
             flag_finish = ''
             first_hp = 100
@@ -1013,12 +1013,12 @@ def main():
                 if event.key == pygame.K_w or event.key == pygame.K_s or event.key == pygame.K_a or event.key == pygame.K_d:
                     first_pushed_buttons -= 1
                     if first_pushed_buttons == 0:
-                        first_selff.first_drive_sound.stop()
+                        first_drive_sound.stop()
                         first_selff.drive_flag = False
                 if event.key == pygame.K_UP or event.key == pygame.K_DOWN or event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                     second_pushed_buttons -= 1
                     if second_pushed_buttons == 0:
-                        second_selff.second_drive_sound.stop()
+                        second_drive_sound.stop()
                         second_selff.drive_flag = False
         first_sprites.update(None)
         second_sprites.update(None)
