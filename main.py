@@ -432,6 +432,29 @@ def finish_screen(player):
         pygame.display.flip()
 
 
+med_box_sprites = pygame.sprite.Group()
+
+
+# class Med_Box(pygame.sprite.Sprite):
+#     image = load_image('med_box.png')
+#     image = pygame.transform.scale(image, (45, 45))
+#
+#     def __init__(self):
+#         super(Med_Box, self).__init__(med_box_sprites)
+#         self.image = Med_Box.image
+#         flag = True
+#         self.rect = self.image.get_rect()
+#         while flag:
+#             x = random.choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+#             # if ...:
+#                 self.rect.x = x
+#                 flag = False
+#         flag = True
+#         while flag:
+#             y = random.choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+#             # if ...:
+#                 self.rect.y = y
+
 def bullet_move(self):
     if self.timer.get_ticks() - self.time >= 500:
         self.rect.x, self.rect.y = -100, -100
