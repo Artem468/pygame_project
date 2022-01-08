@@ -23,14 +23,14 @@ down_st_wall = pygame.sprite.Group()
 flag_finish = ''
 flag_tanks = False
 FPS = 60
-TIME_RELOAD = 1500
+FIRST_TIME_RELOAD = 1500
+SECOND_TIME_RELOAD = 1500
 FIRST_SPEED = 1
 SECOND_SPEED = 1
-first_player = 'blue'
-second_player = 'red'
-first_hp = 100
-second_hp = 100
-replay = False
+FIRST_PLAYER = 'blue'
+SECOND_PLAYER = 'red'
+FIRST_HP = 100
+SECOND_HP = 100
 
 first_drive_sound = pygame.mixer.Sound('data/drive_sound.mp3')
 second_drive_sound = pygame.mixer.Sound('data/drive_sound.mp3')
@@ -179,11 +179,11 @@ def tanks_preview_update():
         tank2 = Second_tank_preview(second_preview_sprites)
         tank1.rect.x = -90
         tank2.rect.x = 900
-        im = load_image(f'{first_player}_tank.png')
+        im = load_image(f'{FIRST_PLAYER}_tank.png')
         im = pygame.transform.scale(im, (90, 90))
         im = pygame.transform.rotate(im, 270)
         tank1.image = im
-        im = load_image(f'{second_player}_tank.png')
+        im = load_image(f'{SECOND_PLAYER}_tank.png')
         im = pygame.transform.scale(im, (90, 90))
         im = pygame.transform.rotate(im, 90)
         tank2.image = im
@@ -194,7 +194,7 @@ def tanks_preview_update():
 
 
 class First_tank_preview(pygame.sprite.Sprite):
-    image = load_image(f'{first_player}_tank.png')
+    image = load_image(f'{FIRST_PLAYER}_tank.png')
     image = pygame.transform.scale(image, (90, 90))
     image = pygame.transform.rotate(image, -90)
 
@@ -211,7 +211,7 @@ class First_tank_preview(pygame.sprite.Sprite):
 
 
 class Second_tank_preview(pygame.sprite.Sprite):
-    image = load_image(f'{second_player}_tank.png')
+    image = load_image(f'{SECOND_PLAYER}_tank.png')
     image = pygame.transform.scale(image, (90, 90))
     image = pygame.transform.rotate(image, 90)
 
@@ -255,23 +255,23 @@ def select_skin_update(player):
 
 def select_skin(player):
     select_skin_update(player)
-    global first_player, second_player
+    global FIRST_PLAYER, SECOND_PLAYER
     done = pygame.transform.scale(load_image('done.png'), (20, 20))
     if player == '1st player':
-        if first_player == 'blue':
+        if FIRST_PLAYER == 'blue':
             pygame.draw.rect(screen, 'green', (235, height // 2 + 55, 20, 20))
             screen.blit(done, (234, height // 2 + 55))
-        elif first_player == 'red':
+        elif FIRST_PLAYER == 'red':
             pygame.draw.rect(screen, 'green', (435, height // 2 + 55, 20, 20))
             screen.blit(done, (434, height // 2 + 55))
         else:
             pygame.draw.rect(screen, 'green', (635, height // 2 + 55, 20, 20))
             screen.blit(done, (634, height // 2 + 55))
     if player == '2nd player':
-        if second_player == 'blue':
+        if SECOND_PLAYER == 'blue':
             pygame.draw.rect(screen, 'green', (235, height // 2 + 55, 20, 20))
             screen.blit(done, (234, height // 2 + 55))
-        elif second_player == 'red':
+        elif SECOND_PLAYER == 'red':
             pygame.draw.rect(screen, 'green', (435, height // 2 + 55, 20, 20))
             screen.blit(done, (434, height // 2 + 55))
         else:
@@ -292,25 +292,25 @@ def select_skin(player):
                         pygame.draw.rect(screen, 'green', (235, height // 2 + 55, 20, 20))
                         screen.blit(done, (234, height // 2 + 55))
                         if player == '1st player':
-                            first_player = 'blue'
+                            FIRST_PLAYER = 'blue'
                         else:
-                            second_player = 'blue'
+                            SECOND_PLAYER = 'blue'
                     if event.pos[0] >= 400 and event.pos[0] <= 490:
                         select_skin_update(player)
                         pygame.draw.rect(screen, 'green', (435, height // 2 + 55, 20, 20))
                         screen.blit(done, (434, height // 2 + 55))
                         if player == '1st player':
-                            first_player = 'red'
+                            FIRST_PLAYER = 'red'
                         else:
-                            second_player = 'red'
+                            SECOND_PLAYER = 'red'
                     if event.pos[0] >= 600 and event.pos[0] <= 690:
                         select_skin_update(player)
                         pygame.draw.rect(screen, 'green', (635, height // 2 + 55, 20, 20))
                         screen.blit(done, (634, height // 2 + 55))
                         if player == '1st player':
-                            first_player = 'green'
+                            FIRST_PLAYER = 'green'
                         else:
-                            second_player = 'green'
+                            SECOND_PLAYER = 'green'
         pygame.display.flip()
         clock.tick(FPS)
 
@@ -401,7 +401,7 @@ def start_screen():
 def print_health():
     font = pygame.font.Font(r'data\teletactile.ttf', 50)
     text_coord = width // 4
-    string_rendered = font.render(str(first_hp), True, pygame.Color(first_player))
+    string_rendered = font.render(str(FIRST_HP), True, pygame.Color(FIRST_PLAYER))
     intro_rect = string_rendered.get_rect()
     text_coord -= string_rendered.get_width() // 2
     intro_rect.top = 20
@@ -410,7 +410,7 @@ def print_health():
 
     font = pygame.font.Font(r'data\teletactile.ttf', 50)
     text_coord = width // 2 + width // 4
-    string_rendered = font.render(str(second_hp), True, pygame.Color(second_player))
+    string_rendered = font.render(str(SECOND_HP), True, pygame.Color(SECOND_PLAYER))
     intro_rect = string_rendered.get_rect()
     text_coord -= string_rendered.get_width() // 2
     intro_rect.top = 20
@@ -423,9 +423,9 @@ def finish_screen(player):
     font = pygame.font.Font(r'data\teletactile.ttf', 50)
     text_coord = width // 2
     if player == 'First player':
-        string_rendered = font.render(f'Winer: {player}', True, pygame.Color(first_player))
+        string_rendered = font.render(f'Winer: {player}', True, pygame.Color(FIRST_PLAYER))
     else:
-        string_rendered = font.render(f'Winer: {player}', True, pygame.Color(second_player))
+        string_rendered = font.render(f'Winer: {player}', True, pygame.Color(SECOND_PLAYER))
     intro_rect = string_rendered.get_rect()
     text_coord -= string_rendered.get_width() // 2
     intro_rect.top = height // 2 - font.get_height() // 2 - 100
@@ -476,6 +476,15 @@ class Med_Box(pygame.sprite.Sprite):
                 self.rect.x = x * 90 + 22
                 self.rect.y = y * 90 + 22
 
+    def update(self):
+        global FIRST_HP, SECOND_HP
+        if pygame.sprite.spritecollideany(self, first_sprites):
+            self.rect.x, self.rect.y = -100, -100
+            FIRST_HP = 100
+        elif pygame.sprite.spritecollideany(self, second_sprites):
+            self.rect.x, self.rect.y = -100, -100
+            SECOND_HP = 100
+
 
 class Fast_Box(pygame.sprite.Sprite):
     image = load_image('fast_box.jpg')
@@ -487,6 +496,8 @@ class Fast_Box(pygame.sprite.Sprite):
         flag = True
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = -100, -100
+        self.time = 0
+        self.player = ''
         while flag:
             x = random.randint(0, 9)
             y = random.randint(0, 9)
@@ -495,6 +506,25 @@ class Fast_Box(pygame.sprite.Sprite):
                 flag = False
                 self.rect.x = x * 90 + 22
                 self.rect.y = y * 90 + 22
+
+    def update(self):
+        global FIRST_SPEED, SECOND_SPEED
+        if pygame.sprite.spritecollideany(self, first_sprites):
+            self.rect.x, self.rect.y = -100, -100
+            FIRST_SPEED = 3
+            self.time = pygame.time.get_ticks()
+            self.player = 'first'
+        elif pygame.sprite.spritecollideany(self, second_sprites):
+            self.rect.x, self.rect.y = -100, -100
+            SECOND_SPEED = 3
+            self.time = pygame.time.get_ticks()
+            self.player = 'second'
+        if self.time != 0:
+            if pygame.time.get_ticks() - self.time >= 10000:
+                if self.player == 'first':
+                    FIRST_SPEED = 1
+                elif self.player == 'second':
+                    SECOND_SPEED = 1
 
 
 class Small_Box(pygame.sprite.Sprite):
@@ -527,6 +557,8 @@ class Bullet_Box(pygame.sprite.Sprite):
         flag = True
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = -100, -100
+        self.time = 0
+        self.player = ''
         while flag:
             x = random.randint(0, 9)
             y = random.randint(0, 9)
@@ -535,6 +567,25 @@ class Bullet_Box(pygame.sprite.Sprite):
                 flag = False
                 self.rect.x = x * 90 + 22
                 self.rect.y = y * 90 + 22
+
+    def update(self):
+        global FIRST_TIME_RELOAD, SECOND_TIME_RELOAD
+        if pygame.sprite.spritecollideany(self, first_sprites):
+            self.rect.x, self.rect.y = -100, -100
+            FIRST_TIME_RELOAD = 0
+            self.time = pygame.time.get_ticks()
+            self.player = 'first'
+        elif pygame.sprite.spritecollideany(self, second_sprites):
+            self.rect.x, self.rect.y = -100, -100
+            SECOND_TIME_RELOAD = 0
+            self.time = pygame.time.get_ticks()
+            self.player = 'second'
+        if self.time != 0:
+            if pygame.time.get_ticks() - self.time >= 10000:
+                if self.player == 'first':
+                    FIRST_TIME_RELOAD = 1500
+                elif self.player == 'second':
+                    SECOND_TIME_RELOAD = 1500
 
 
 def bullet_move(self):
@@ -624,10 +675,10 @@ class Bullet(pygame.sprite.Sprite):
                                                 self.image = pygame.transform.rotate(self.image, 180)
                                         hit_hp = 100 - cells * 10
                                         hit_hp = hit_random * hit_hp // 100
-                                        global second_hp
-                                        second_hp -= hit_hp
-                                        if second_hp <= 0:
-                                            second_hp = 0
+                                        global SECOND_HP
+                                        SECOND_HP -= hit_hp
+                                        if SECOND_HP <= 0:
+                                            SECOND_HP = 0
                                             boom_sound = pygame.mixer.Sound('data/boom_tank.mp3')
                                             boom_sound.play()
                                             boom_sound.set_volume(0.4)
@@ -685,10 +736,10 @@ class Bullet(pygame.sprite.Sprite):
                                             self.image = pygame.transform.rotate(self.image, 180)
                                     hit_hp = 100 - cells * 10
                                     hit_hp = hit_random * hit_hp // 100
-                                    global first_hp
-                                    first_hp -= hit_hp
-                                    if first_hp <= 0:
-                                        first_hp = 0
+                                    global FIRST_HP
+                                    FIRST_HP -= hit_hp
+                                    if FIRST_HP <= 0:
+                                        FIRST_HP = 0
                                         boom_sound = pygame.mixer.Sound('data/boom_tank.mp3')
                                         boom_sound.play()
                                         boom_sound.set_volume(0.4)
@@ -757,7 +808,7 @@ bullet = Bullet(bullet_sprites)
 
 
 class First_tank(pygame.sprite.Sprite):
-    image = load_image(f'{first_player}_tank.png')
+    image = load_image(f'{FIRST_PLAYER}_tank.png')
     image = pygame.transform.scale(image, (80, 80))
 
     def __init__(self, *group):
@@ -824,7 +875,7 @@ class First_tank(pygame.sprite.Sprite):
                     self.image = pygame.transform.rotate(self.image, 270)
                 self.direction = 'down'
         if action == 'fire':
-            if self.timer.get_ticks() - self.fire_time >= TIME_RELOAD:
+            if self.timer.get_ticks() - self.fire_time >= FIRST_TIME_RELOAD:
                 self.fire_time = self.timer.get_ticks()
                 bullet = Bullet(bullet_sprites)
                 all_sprites.add(bullet_sprites)
@@ -893,7 +944,7 @@ class First_tank(pygame.sprite.Sprite):
 
 
 class Second_tank(pygame.sprite.Sprite):
-    image = load_image(f'{second_player}_tank.png')
+    image = load_image(f'{SECOND_PLAYER}_tank.png')
     image = pygame.transform.scale(image, (80, 80))
     image = pygame.transform.rotate(image, 180)
 
@@ -960,7 +1011,7 @@ class Second_tank(pygame.sprite.Sprite):
                     self.image = pygame.transform.rotate(self.image, 270)
                 self.direction = 'down'
         if action == 'fire':
-            if self.timer.get_ticks() - self.fire_time >= TIME_RELOAD:
+            if self.timer.get_ticks() - self.fire_time >= SECOND_TIME_RELOAD:
                 self.fire_time = self.timer.get_ticks()
                 bullet = Bullet(bullet_sprites)
                 all_sprites.add(bullet_sprites)
@@ -1038,12 +1089,12 @@ def main():
     global first_drive_sound, second_drive_sound
     first_sprites = pygame.sprite.Group()
     first_tank = First_tank(first_sprites)
-    im = load_image(f'{first_player}_tank.png')
+    im = load_image(f'{FIRST_PLAYER}_tank.png')
     im = pygame.transform.scale(im, (80, 80))
     first_tank.image = im
     second_sprites = pygame.sprite.Group()
     second_tank = Second_tank(second_sprites)
-    im = load_image(f'{second_player}_tank.png')
+    im = load_image(f'{SECOND_PLAYER}_tank.png')
     im = pygame.transform.scale(im, (80, 80))
     im = pygame.transform.rotate(im, 180)
     second_tank.image = im
@@ -1060,7 +1111,7 @@ def main():
 
     first_pushed_buttons = 0
     second_pushed_buttons = 0
-    global running, flag_finish, first_hp, second_hp
+    global running, flag_finish, FIRST_HP, SECOND_HP
     running = True
     while running:
         clock.tick(FPS)
@@ -1087,8 +1138,8 @@ def main():
             second_drive_sound.stop()
             finish_screen(flag_finish)
             flag_finish = ''
-            first_hp = 100
-            second_hp = 100
+            FIRST_HP = 100
+            SECOND_HP = 100
             return
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -1124,6 +1175,10 @@ def main():
         first_sprites.update(None)
         second_sprites.update(None)
         bullet_sprites.update()
+        med_box_sprites.update()
+        fast_box_sprites.update()
+        bullet_box_sprites.update()
+        small_box_sprites.update()
         all_sprites.draw(screen)
         print_health()
         pygame.draw.rect(screen, 'grey', (15, 15, 40, 40))
