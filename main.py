@@ -17,6 +17,8 @@ right_st_wall = pygame.sprite.Group()
 left_st_wall = pygame.sprite.Group()
 up_st_wall = pygame.sprite.Group()
 down_st_wall = pygame.sprite.Group()
+# border_sprite = pygame.sprite.Group()
+
 
 flag_finish = ''
 flag_tanks = False
@@ -29,6 +31,9 @@ second_player = 'red'
 first_hp = 100
 second_hp = 100
 replay = False
+
+first_drive_sound = pygame.mixer.Sound('data/drive_sound.mp3')
+second_drive_sound = pygame.mixer.Sound('data/drive_sound.mp3')
 
 
 def terminate():
@@ -131,6 +136,15 @@ class Tile(Sprite):
             tile_width * pos_x, tile_height * pos_y)
 
 
+# class Border(pygame.sprite.Sprite):
+#     def __init__(self, x1, y1):
+#         super().__init__()
+#         self.add(border_sprite)
+#         self.image = pygame.Surface([90, 90])
+#         self.image.fill((128, 128, 128))
+#         self.rect = pygame.Rect(x1 * 90, y1 * 90, 90, 90)
+
+
 def load_level(filename):
     filename = "data/" + filename
     with open(filename, 'r') as mapFile:
@@ -140,6 +154,8 @@ def load_level(filename):
 
 
 def generate_level(level):
+    global spisok_wall
+    spisok_wall = []
     for y in range(len(level)):
         for x in range(len(level[y])):
             if level[y][x] == '@':
@@ -150,6 +166,8 @@ def generate_level(level):
                 Border_hor_down(x, y)
                 Border_ver_left(x, y)
                 Border_ver_right(x, y)
+                # Border(x, y)
+                spisok_wall.append(f'{x} {y}')
 
 
 def tanks_preview_update():
@@ -434,27 +452,90 @@ def finish_screen(player):
 
 
 med_box_sprites = pygame.sprite.Group()
+fast_box_sprites = pygame.sprite.Group()
+small_box_sprites = pygame.sprite.Group()
+bullet_box_sprites = pygame.sprite.Group()
 
 
-# class Med_Box(pygame.sprite.Sprite):
-#     image = load_image('med_box.png')
-#     image = pygame.transform.scale(image, (45, 45))
-#
-#     def __init__(self):
-#         super(Med_Box, self).__init__(med_box_sprites)
-#         self.image = Med_Box.image
-#         flag = True
-#         self.rect = self.image.get_rect()
-#         while flag:
-#             x = random.choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-#             # if ...:
-#                 self.rect.x = x
-#                 flag = False
-#         flag = True
-#         while flag:
-#             y = random.choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-#             # if ...:
-#                 self.rect.y = y
+class Med_Box(pygame.sprite.Sprite):
+    image = load_image('med_box.jpg')
+    image = pygame.transform.scale(image, (45, 45))
+
+    def __init__(self):
+        super(Med_Box, self).__init__(med_box_sprites)
+        self.image = Med_Box.image
+        flag = True
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = -100, -100
+        while flag:
+            x = random.randint(0, 9)
+            y = random.randint(0, 9)
+            gg = f'{x} {y}'
+            if gg not in spisok_wall:
+                flag = False
+                self.rect.x = x * 90 + 22
+                self.rect.y = y * 90 + 22
+
+
+class Fast_Box(pygame.sprite.Sprite):
+    image = load_image('fast_box.jpg')
+    image = pygame.transform.scale(image, (45, 45))
+
+    def __init__(self):
+        super(Fast_Box, self).__init__(fast_box_sprites)
+        self.image = Fast_Box.image
+        flag = True
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = -100, -100
+        while flag:
+            x = random.randint(0, 9)
+            y = random.randint(0, 9)
+            gg = f'{x} {y}'
+            if gg not in spisok_wall:
+                flag = False
+                self.rect.x = x * 90 + 22
+                self.rect.y = y * 90 + 22
+
+
+class Small_Box(pygame.sprite.Sprite):
+    image = load_image('small_box.jpg')
+    image = pygame.transform.scale(image, (45, 45))
+
+    def __init__(self):
+        super(Small_Box, self).__init__(small_box_sprites)
+        self.image = Small_Box.image
+        flag = True
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = -100, -100
+        while flag:
+            x = random.randint(0, 9)
+            y = random.randint(0, 9)
+            gg = f'{x} {y}'
+            if gg not in spisok_wall:
+                flag = False
+                self.rect.x = x * 90 + 22
+                self.rect.y = y * 90 + 22
+
+
+class Bullet_Box(pygame.sprite.Sprite):
+    image = load_image('bullet_box.jpg')
+    image = pygame.transform.scale(image, (45, 45))
+
+    def __init__(self):
+        super(Bullet_Box, self).__init__(bullet_box_sprites)
+        self.image = Bullet_Box.image
+        flag = True
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = -100, -100
+        while flag:
+            x = random.randint(0, 9)
+            y = random.randint(0, 9)
+            gg = f'{x} {y}'
+            if gg not in spisok_wall:
+                flag = False
+                self.rect.x = x * 90 + 22
+                self.rect.y = y * 90 + 22
+
 
 def bullet_move(self):
     if self.timer.get_ticks() - self.time >= 500:
@@ -695,10 +776,10 @@ class First_tank(pygame.sprite.Sprite):
         if action == 'drive':
             if not self.drive_flag:
                 global first_drive_sound
-                first_drive_sound = pygame.mixer.Sound('data/drive_sound.mp3')
+
                 first_drive_sound.play()
                 first_drive_sound.set_volume(0.3)
-                self.drive_flag = True
+                drive_flag = True
         self.speedx = 0
         self.speedy = 0
         keystate = pygame.key.get_pressed()
@@ -832,7 +913,6 @@ class Second_tank(pygame.sprite.Sprite):
         if action == 'drive':
             if not self.drive_flag:
                 global second_drive_sound
-                second_drive_sound = pygame.mixer.Sound('data/drive_sound.mp3')
                 second_drive_sound.play()
                 second_drive_sound.set_volume(0.3)
                 self.drive_flag = True
@@ -955,6 +1035,7 @@ def fight_screen_update():
 
 def main():
     global first_sprites, second_sprites
+    global first_drive_sound, second_drive_sound
     first_sprites = pygame.sprite.Group()
     first_tank = First_tank(first_sprites)
     im = load_image(f'{first_player}_tank.png')
@@ -967,6 +1048,8 @@ def main():
     im = pygame.transform.rotate(im, 180)
     second_tank.image = im
     fight_screen_update()
+    time = pygame.time.get_ticks()
+
     all_sprites.add(sprite_group)
     all_sprites.add(first_sprites)
     all_sprites.add(second_sprites)
@@ -981,6 +1064,24 @@ def main():
     running = True
     while running:
         clock.tick(FPS)
+        if pygame.time.get_ticks() - time >= 15000:
+            box = random.choice(['Med_Box', 'Bullet_Box', 'Small_Box', 'Fast_Box'])
+            if box == 'Med_Box':
+                Med_Box()
+                all_sprites.add(med_box_sprites)
+                time = pygame.time.get_ticks()
+            elif box == 'Bullet_Box':
+                Bullet_Box()
+                all_sprites.add(bullet_box_sprites)
+                time = pygame.time.get_ticks()
+            elif box == 'Small_Box':
+                Small_Box()
+                all_sprites.add(small_box_sprites)
+                time = pygame.time.get_ticks()
+            else:
+                Fast_Box()
+                all_sprites.add(fast_box_sprites)
+                time = pygame.time.get_ticks()
         if flag_finish:
             first_drive_sound.stop()
             second_drive_sound.stop()
