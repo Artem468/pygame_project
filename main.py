@@ -19,7 +19,8 @@ up_st_wall = pygame.sprite.Group()
 down_st_wall = pygame.sprite.Group()
 # border_sprite = pygame.sprite.Group()
 
-
+first_small_flag = False
+second_small_flag = False
 flag_finish = ''
 flag_tanks = False
 FPS = 60
@@ -511,20 +512,22 @@ class Fast_Box(pygame.sprite.Sprite):
         global FIRST_SPEED, SECOND_SPEED
         if pygame.sprite.spritecollideany(self, first_sprites):
             self.rect.x, self.rect.y = -100, -100
-            FIRST_SPEED = 3
+            FIRST_SPEED += 2
             self.time = pygame.time.get_ticks()
             self.player = 'first'
         elif pygame.sprite.spritecollideany(self, second_sprites):
             self.rect.x, self.rect.y = -100, -100
-            SECOND_SPEED = 3
+            SECOND_SPEED += 2
             self.time = pygame.time.get_ticks()
             self.player = 'second'
         if self.time != 0:
             if pygame.time.get_ticks() - self.time >= 10000:
                 if self.player == 'first':
-                    FIRST_SPEED = 1
+                    FIRST_SPEED -= 2
+                    self.time = 0
                 elif self.player == 'second':
-                    SECOND_SPEED = 1
+                    SECOND_SPEED -= 2
+                    self.time = 0
 
 
 class Small_Box(pygame.sprite.Sprite):
@@ -537,6 +540,7 @@ class Small_Box(pygame.sprite.Sprite):
         flag = True
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = -100, -100
+        self.time = 0
         while flag:
             x = random.randint(0, 9)
             y = random.randint(0, 9)
@@ -545,6 +549,37 @@ class Small_Box(pygame.sprite.Sprite):
                 flag = False
                 self.rect.x = x * 90 + 22
                 self.rect.y = y * 90 + 22
+
+    def update(self):
+        global first_small_flag, second_small_flag, FIRST_SPEED, SECOND_SPEED
+        if pygame.sprite.spritecollideany(self, first_sprites):
+            self.rect.x, self.rect.y = -100, -100
+            im = load_image(f'{FIRST_PLAYER}_tank.png')
+            im = pygame.transform.scale(im, (40, 40))
+            First_tank.image = im
+            self.time = pygame.time.get_ticks()
+            self.player = 'first'
+            first_small_flag = 'small'
+            FIRST_SPEED += 2
+        elif pygame.sprite.spritecollideany(self, second_sprites):
+            self.rect.x, self.rect.y = -100, -100
+            im = load_image(f'{SECOND_PLAYER}_tank.png')
+            im = pygame.transform.scale(im, (40, 40))
+            Second_tank.image = im
+            self.time = pygame.time.get_ticks()
+            self.player = 'second'
+            second_small_flag = 'small'
+            SECOND_SPEED += 2
+        if self.time != 0:
+            if pygame.time.get_ticks() - self.time >= 10000:
+                if self.player == 'first':
+                    first_small_flag = 'big'
+                    FIRST_SPEED -= 2
+                    self.time = 0
+                elif self.player == 'second':
+                    SECOND_SPEED -= 2
+                    second_small_flag = 'big'
+                    self.time = 0
 
 
 class Bullet_Box(pygame.sprite.Sprite):
@@ -584,8 +619,10 @@ class Bullet_Box(pygame.sprite.Sprite):
             if pygame.time.get_ticks() - self.time >= 10000:
                 if self.player == 'first':
                     FIRST_TIME_RELOAD = 1500
+                    self.time = 0
                 elif self.player == 'second':
                     SECOND_TIME_RELOAD = 1500
+                    self.time = 0
 
 
 def bullet_move(self):
@@ -824,13 +861,43 @@ class First_tank(pygame.sprite.Sprite):
         first_selff = self
 
     def update(self, action):
+        global first_small_flag
+        if first_small_flag == 'small':
+            first_small_flag = ''
+            im = load_image(f'{FIRST_PLAYER}_tank.png')
+            im = pygame.transform.scale(im, (40, 40))
+            self.image = im
+            x, y = self.rect.x, self.rect.y
+            self.rect = self.image.get_rect()
+            self.rect.x = x
+            self.rect.y = y
+            if self.direction == 'down':
+                self.image = pygame.transform.rotate(self.image, 180)
+            elif self.direction == 'left':
+                self.image = pygame.transform.rotate(self.image, 90)
+            elif self.direction == 'right':
+                self.image = pygame.transform.rotate(self.image, 270)
+        elif first_small_flag == 'big':
+            first_small_flag = ''
+            im = load_image(f'{FIRST_PLAYER}_tank.png')
+            im = pygame.transform.scale(im, (80, 80))
+            self.image = im
+            x, y = self.rect.x, self.rect.y
+            self.rect = self.image.get_rect()
+            self.rect.x = x + 40
+            self.rect.y = y + 40
+            if self.direction == 'down':
+                self.image = pygame.transform.rotate(self.image, 180)
+            elif self.direction == 'left':
+                self.image = pygame.transform.rotate(self.image, 90)
+            elif self.direction == 'right':
+                self.image = pygame.transform.rotate(self.image, 270)
         if action == 'drive':
             if not self.drive_flag:
                 global first_drive_sound
-
-                first_drive_sound.play()
+                first_drive_sound.play(-1)
                 first_drive_sound.set_volume(0.3)
-                drive_flag = True
+                self.drive_flag = True
         self.speedx = 0
         self.speedy = 0
         keystate = pygame.key.get_pressed()
@@ -961,10 +1028,41 @@ class Second_tank(pygame.sprite.Sprite):
         second_selff = self
 
     def update(self, action):
+        global second_small_flag
+        if second_small_flag == 'small':
+            second_small_flag = ''
+            im = load_image(f'{SECOND_PLAYER}_tank.png')
+            im = pygame.transform.scale(im, (40, 40))
+            self.image = im
+            x, y = self.rect.x, self.rect.y
+            self.rect = self.image.get_rect()
+            self.rect.x = x
+            self.rect.y = y
+            if self.direction == 'down':
+                self.image = pygame.transform.rotate(self.image, 180)
+            elif self.direction == 'left':
+                self.image = pygame.transform.rotate(self.image, 90)
+            elif self.direction == 'right':
+                self.image = pygame.transform.rotate(self.image, 270)
+        elif second_small_flag == 'big':
+            second_small_flag = ''
+            im = load_image(f'{SECOND_PLAYER}_tank.png')
+            im = pygame.transform.scale(im, (80, 80))
+            self.image = im
+            x, y = self.rect.x, self.rect.y
+            self.rect = self.image.get_rect()
+            self.rect.x = x + 40
+            self.rect.y = y + 40
+            if self.direction == 'down':
+                self.image = pygame.transform.rotate(self.image, 180)
+            elif self.direction == 'left':
+                self.image = pygame.transform.rotate(self.image, 90)
+            elif self.direction == 'right':
+                self.image = pygame.transform.rotate(self.image, 270)
         if action == 'drive':
             if not self.drive_flag:
                 global second_drive_sound
-                second_drive_sound.play()
+                second_drive_sound.play(-1)
                 second_drive_sound.set_volume(0.3)
                 self.drive_flag = True
         self.speedx = 0
@@ -1115,7 +1213,7 @@ def main():
     running = True
     while running:
         clock.tick(FPS)
-        if pygame.time.get_ticks() - time >= 15000:
+        if pygame.time.get_ticks() - time >= 7000:
             box = random.choice(['Med_Box', 'Bullet_Box', 'Small_Box', 'Fast_Box'])
             if box == 'Med_Box':
                 Med_Box()
