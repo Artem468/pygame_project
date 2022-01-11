@@ -23,6 +23,7 @@ first_small_flag = False
 second_small_flag = False
 flag_finish = ''
 flag_tanks = False
+MAP = ''
 FPS = 60
 FIRST_TIME_RELOAD = 1500
 SECOND_TIME_RELOAD = 1500
@@ -361,6 +362,7 @@ def start_screen_update():
 def start_screen():
     start_screen_update()
     tanks_preview_update()
+    global start_screen_sound
     start_screen_sound = pygame.mixer.Sound('data/sound_lobby.mp3')
     start_screen_sound.play(-1)
     start_screen_sound.set_volume(0.5)
@@ -374,8 +376,7 @@ def start_screen():
                     if event.pos[1] >= 300 and event.pos[1] <= 350:
                         tank1.rect.x = -200
                         tank2.rect.x = -200
-                        start_screen_sound.stop()
-                        main()
+                        map_select()
                         start_screen_update()
                         tanks_preview_update()
                         start_screen_sound = pygame.mixer.Sound('data/sound_lobby.mp3')
@@ -396,6 +397,47 @@ def start_screen():
         tank2.update()
         first_preview_sprites.draw(screen)
         second_preview_sprites.draw(screen)
+        pygame.display.flip()
+
+
+def map_select():
+    fon = pygame.transform.scale(load_image('background.png'), size)
+    screen.blit(fon, (0, 0))
+    font = pygame.font.Font(r'data\teletactile.ttf', 50)
+    text_coord = width // 2
+    string_rendered = font.render('Map Select', True, pygame.Color('black'))
+    intro_rect = string_rendered.get_rect()
+    text_coord -= string_rendered.get_width() // 2
+    intro_rect.top = 20
+    intro_rect.x = text_coord
+    pygame.draw.rect(screen, 'green',
+                     (intro_rect.x - 5, intro_rect.y - 6, intro_rect.width + 8, intro_rect.height + 8))
+    screen.blit(string_rendered, intro_rect)
+
+    pygame.draw.rect(screen, 'grey', (15, 15, 40, 40))
+    back = pygame.transform.scale(load_image('back.png'), (40, 40))
+    screen.blit(back, (15, 14))
+
+    map1 = load_image('map1.jpg')
+    map1 = pygame.transform.scale(map1, (150, 150))
+    screen.blit(map1, (width // 3 - map1.get_width() // 2, height // 2 - map1.get_height() // 2))
+
+    while True:
+        clock.tick(FPS)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.pos[0] >= 15 and event.pos[0] <= 55:
+                    if event.pos[1] >= 15 and event.pos[1] <= 55:
+                        return
+                if event.pos[0] >= width // 3 - map1.get_width() // 2 and event.pos[0] <= (width // 3 - map1.get_width() // 2) + 150:
+                    if event.pos[1] >= height // 2 - map1.get_height() // 2 and event.pos[1] <= (height // 2 - map1.get_height() // 2) + 150:
+                        start_screen_sound.stop()
+                        global MAP
+                        MAP = 'map.map'
+                        main()
+                        return
         pygame.display.flip()
 
 
@@ -1178,7 +1220,7 @@ class Second_tank(pygame.sprite.Sprite):
 
 
 def fight_screen_update():
-    level_map = load_level("map.map")
+    level_map = load_level(MAP)
     generate_level(level_map)
 
 
