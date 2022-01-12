@@ -891,8 +891,8 @@ class First_tank(pygame.sprite.Sprite):
             self.image = im
             x, y = self.rect.x, self.rect.y
             self.rect = self.image.get_rect()
-            self.rect.x = x // 90 * 90 + 10
-            self.rect.y = y // 90 * 90 + 5
+            self.rect.x = x + 20
+            self.rect.y = y + 20
             if self.direction == 'down':
                 self.image = pygame.transform.rotate(self.image, 180)
             elif self.direction == 'left':
@@ -906,8 +906,8 @@ class First_tank(pygame.sprite.Sprite):
             self.image = im
             x, y = self.rect.x, self.rect.y
             self.rect = self.image.get_rect()
-            self.rect.x = x - 20
-            self.rect.y = y - 20
+            self.rect.x = x // 90 * 90 + 10
+            self.rect.y = y // 90 * 90 + 5
             if self.direction == 'down':
                 self.image = pygame.transform.rotate(self.image, 180)
             elif self.direction == 'left':
