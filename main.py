@@ -3,6 +3,7 @@ import os
 import sys
 import random
 
+MAP = ''
 pygame.init()
 size = width, height = 900, 900
 screen = pygame.display.set_mode(size)
@@ -17,13 +18,12 @@ right_st_wall = pygame.sprite.Group()
 left_st_wall = pygame.sprite.Group()
 up_st_wall = pygame.sprite.Group()
 down_st_wall = pygame.sprite.Group()
-# border_sprite = pygame.sprite.Group()
 
+flag_sound = True
 first_small_flag = False
 second_small_flag = False
 flag_finish = ''
 flag_tanks = False
-MAP = ''
 FPS = 60
 FIRST_TIME_RELOAD = 1500
 SECOND_TIME_RELOAD = 1500
@@ -60,8 +60,8 @@ def load_image(name, colorkey=None):
 
 
 tile_images = {
-    'wall': load_image('box.png'),
-    'empty': load_image('grass.png')
+    'wall': load_image('wooden_box.png'),
+    'empty': load_image('sand.png')
 }
 tile_width = tile_height = 90
 
@@ -136,15 +136,6 @@ class Tile(Sprite):
         self.image = tile_images[tile_type]
         self.rect = self.image.get_rect().move(
             tile_width * pos_x, tile_height * pos_y)
-
-
-# class Border(pygame.sprite.Sprite):
-#     def __init__(self, x1, y1):
-#         super().__init__()
-#         self.add(border_sprite)
-#         self.image = pygame.Surface([90, 90])
-#         self.image.fill((128, 128, 128))
-#         self.rect = pygame.Rect(x1 * 90, y1 * 90, 90, 90)
 
 
 def load_level(filename):
@@ -362,11 +353,13 @@ def start_screen_update():
 def start_screen():
     start_screen_update()
     tanks_preview_update()
-    global start_screen_sound
-    start_screen_sound = pygame.mixer.Sound('data/sound_lobby.mp3')
-    start_screen_sound.play(-1)
-    start_screen_sound.set_volume(0.5)
+    global start_screen_sound, flag_sound
     while True:
+        if flag_sound:
+            start_screen_sound = pygame.mixer.Sound('data/sound_lobby.mp3')
+            start_screen_sound.play(-1)
+            start_screen_sound.set_volume(0.5)
+            flag_sound = False
         clock.tick(FPS)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -379,9 +372,6 @@ def start_screen():
                         map_select()
                         start_screen_update()
                         tanks_preview_update()
-                        start_screen_sound = pygame.mixer.Sound('data/sound_lobby.mp3')
-                        start_screen_sound.play(-1)
-                        start_screen_sound.set_volume(0.5)
                 if event.pos[0] >= 180 and event.pos[0] <= 440:
                     if event.pos[1] >= 400 and event.pos[1] <= 435:
                         select_skin('1st player')
@@ -401,6 +391,7 @@ def start_screen():
 
 
 def map_select():
+    global flag_sound
     fon = pygame.transform.scale(load_image('background.png'), size)
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(r'data\teletactile.ttf', 50)
@@ -436,6 +427,7 @@ def map_select():
                         start_screen_sound.stop()
                         global MAP
                         MAP = 'map.map'
+                        flag_sound = True
                         main()
                         return
         pygame.display.flip()
@@ -602,7 +594,6 @@ class Small_Box(pygame.sprite.Sprite):
             self.time = pygame.time.get_ticks()
             self.player = 'first'
             first_small_flag = 'small'
-            FIRST_SPEED += 2
         elif pygame.sprite.spritecollideany(self, second_sprites):
             self.rect.x, self.rect.y = -100, -100
             im = load_image(f'{SECOND_PLAYER}_tank.png')
@@ -611,15 +602,12 @@ class Small_Box(pygame.sprite.Sprite):
             self.time = pygame.time.get_ticks()
             self.player = 'second'
             second_small_flag = 'small'
-            SECOND_SPEED += 2
         if self.time != 0:
             if pygame.time.get_ticks() - self.time >= 10000:
                 if self.player == 'first':
                     first_small_flag = 'big'
-                    FIRST_SPEED -= 2
                     self.time = 0
                 elif self.player == 'second':
-                    SECOND_SPEED -= 2
                     second_small_flag = 'big'
                     self.time = 0
 
@@ -673,9 +661,20 @@ def bullet_move(self):
         self.flag = False
 
 
+def bullet_change_im(self):
+    if self.flag_im:
+        im = load_image('boom.png')
+        im = pygame.transform.scale(im, (50, 40))
+        self.image = im
+        self.time = self.timer.get_ticks()
+        self.flag_im = False
+        self.flag_move = False
+        self.flag = True
+
+
 class Bullet(pygame.sprite.Sprite):
-    image = load_image('bullet.png')
-    image = pygame.transform.scale(image, (15, 35))
+    image = load_image('bullet.png', -1)
+    image = pygame.transform.scale(image, (12, 30))
 
     def __init__(self, *group):
         super(Bullet, self).__init__(*group)
@@ -717,6 +716,9 @@ class Bullet(pygame.sprite.Sprite):
                                             cells = round(abs(self.x1 - self.rect.x) / 90)
                                         hit_random = random.choice([0, 50, 50, 100])
                                         if hit_random == 100:
+                                            popal = pygame.mixer.Sound('data/damage_100.mp3')
+                                            popal.play()
+                                            popal.set_volume(0.3)
                                             im = load_image('boom.png', -1)
                                             im = pygame.transform.scale(im, (85, 75))
                                             self.image = im
@@ -725,6 +727,9 @@ class Bullet(pygame.sprite.Sprite):
                                             self.flag_move = False
                                             self.flag = True
                                         elif hit_random == 50:
+                                            popal = pygame.mixer.Sound('data/damage_50.mp3')
+                                            popal.play()
+                                            popal.set_volume(0.3)
                                             im = load_image('boom.png', -1)
                                             im = pygame.transform.scale(im, (50, 40))
                                             self.image = im
@@ -777,7 +782,10 @@ class Bullet(pygame.sprite.Sprite):
                                     else:
                                         cells = round(abs(self.x1 - self.rect.x) / 90)
                                     hit_random = random.choice([0, 50, 50, 100])
+                                    popal = pygame.mixer.Sound('data/damage_100.mp3')
+                                    popal.set_volume(0.3)
                                     if hit_random == 100:
+                                        popal.play()
                                         im = load_image('boom.png', -1)
                                         im = pygame.transform.scale(im, (85, 75))
                                         self.image = im
@@ -786,6 +794,7 @@ class Bullet(pygame.sprite.Sprite):
                                         self.flag_move = False
                                         self.flag = True
                                     elif hit_random == 50:
+                                        popal.play()
                                         im = load_image('boom.png', -1)
                                         im = pygame.transform.scale(im, (50, 40))
                                         self.image = im
@@ -832,46 +841,17 @@ class Bullet(pygame.sprite.Sprite):
                                     elif self.direction == 'down':
                                         self.rect.move_ip(-30, 0)
                         else:
-                            if self.flag_im:
-                                im = load_image('boom.png')
-                                im = pygame.transform.scale(im, (50, 40))
-                                self.image = im
-                                self.time = self.timer.get_ticks()
-                                self.flag_im = False
-                                self.flag_move = False
-                                self.flag = True
-                                self.rect.move_ip(-10, -10)
+                            bullet_change_im(self)
+                            self.rect.move_ip(-10, -10)
                     else:
-                        if self.flag_im:
-                            im = load_image('boom.png')
-                            im = pygame.transform.scale(im, (50, 40))
-                            self.image = im
-                            self.time = self.timer.get_ticks()
-                            self.flag_im = False
-                            self.flag_move = False
-                            self.flag = True
-                            self.rect.move_ip(-15, 15)
+                        bullet_change_im(self)
+                        self.rect.move_ip(-15, 15)
                 else:
-                    if self.flag_im:
-                        im = load_image('boom.png')
-                        im = pygame.transform.scale(im, (50, 40))
-                        self.image = im
-                        self.time = self.timer.get_ticks()
-                        self.flag_im = False
-                        self.flag_move = False
-                        self.flag = True
-                        self.rect.move_ip(-10, -10)
+                    bullet_change_im(self)
+                    self.rect.move_ip(-10, -10)
             else:
-                if self.flag_im:
-                    im = load_image('boom.png')
-                    im = pygame.transform.scale(im, (50, 40))
-                    self.image = im
-                    self.time = self.timer.get_ticks()
-                    self.flag_im = False
-                    self.flag_move = False
-                    self.flag = True
-                    self.rect.move_ip(-20, -10)
-
+                bullet_change_im(self)
+                self.rect.move_ip(-20, -10)
         if self.rect.x > 900:
             self.flag_move = False
         elif self.rect.x < -35:
@@ -903,7 +883,7 @@ class First_tank(pygame.sprite.Sprite):
         first_selff = self
 
     def update(self, action):
-        global first_small_flag
+        global first_small_flag, flag_finish
         if first_small_flag == 'small':
             first_small_flag = ''
             im = load_image(f'{FIRST_PLAYER}_tank.png')
@@ -911,8 +891,8 @@ class First_tank(pygame.sprite.Sprite):
             self.image = im
             x, y = self.rect.x, self.rect.y
             self.rect = self.image.get_rect()
-            self.rect.x = x
-            self.rect.y = y
+            self.rect.x = x // 90 * 90 + 10
+            self.rect.y = y // 90 * 90 + 5
             if self.direction == 'down':
                 self.image = pygame.transform.rotate(self.image, 180)
             elif self.direction == 'left':
@@ -926,14 +906,24 @@ class First_tank(pygame.sprite.Sprite):
             self.image = im
             x, y = self.rect.x, self.rect.y
             self.rect = self.image.get_rect()
-            self.rect.x = x + 40
-            self.rect.y = y + 40
+            self.rect.x = x - 20
+            self.rect.y = y - 20
             if self.direction == 'down':
                 self.image = pygame.transform.rotate(self.image, 180)
             elif self.direction == 'left':
                 self.image = pygame.transform.rotate(self.image, 90)
             elif self.direction == 'right':
                 self.image = pygame.transform.rotate(self.image, 270)
+        if flag_finish:
+            image = load_image(f'{FIRST_PLAYER}_tank.png')
+            image = pygame.transform.scale(image, (80, 80))
+            self.image = image
+            self.rect = self.image.get_rect()
+            self.rect.x, self.rect.y = 0, 810
+            self.direction = 'up'
+            self.timer = pygame.time
+            self.fire_time = 0
+            self.drive_flag = False
         if action == 'drive':
             if not self.drive_flag:
                 global first_drive_sound
@@ -1070,7 +1060,7 @@ class Second_tank(pygame.sprite.Sprite):
         second_selff = self
 
     def update(self, action):
-        global second_small_flag
+        global second_small_flag, flag_finish
         if second_small_flag == 'small':
             second_small_flag = ''
             im = load_image(f'{SECOND_PLAYER}_tank.png')
@@ -1078,8 +1068,8 @@ class Second_tank(pygame.sprite.Sprite):
             self.image = im
             x, y = self.rect.x, self.rect.y
             self.rect = self.image.get_rect()
-            self.rect.x = x
-            self.rect.y = y
+            self.rect.x = x + 20
+            self.rect.y = y + 20
             if self.direction == 'down':
                 self.image = pygame.transform.rotate(self.image, 180)
             elif self.direction == 'left':
@@ -1093,14 +1083,25 @@ class Second_tank(pygame.sprite.Sprite):
             self.image = im
             x, y = self.rect.x, self.rect.y
             self.rect = self.image.get_rect()
-            self.rect.x = x + 40
-            self.rect.y = y + 40
+            self.rect.x = x // 90 * 90 + 10
+            self.rect.y = y // 90 * 90 + 5
             if self.direction == 'down':
                 self.image = pygame.transform.rotate(self.image, 180)
             elif self.direction == 'left':
                 self.image = pygame.transform.rotate(self.image, 90)
             elif self.direction == 'right':
                 self.image = pygame.transform.rotate(self.image, 270)
+        if flag_finish:
+            image = load_image(f'{SECOND_PLAYER}_tank.png')
+            image = pygame.transform.scale(image, (80, 80))
+            image = pygame.transform.rotate(image, 180)
+            self.image = image
+            self.rect = self.image.get_rect()
+            self.rect.x, self.rect.y = 810, 0
+            self.direction = 'down'
+            self.timer = pygame.time
+            self.fire_time = 0
+            self.drive_flag = False
         if action == 'drive':
             if not self.drive_flag:
                 global second_drive_sound
@@ -1220,13 +1221,14 @@ class Second_tank(pygame.sprite.Sprite):
 
 
 def fight_screen_update():
-    level_map = load_level(MAP)
+    level_map = load_level("map.map")
     generate_level(level_map)
 
 
 def main():
     global first_sprites, second_sprites
     global first_drive_sound, second_drive_sound
+    global running, flag_finish, FIRST_HP, SECOND_HP
     first_sprites = pygame.sprite.Group()
     first_tank = First_tank(first_sprites)
     im = load_image(f'{FIRST_PLAYER}_tank.png')
@@ -1251,7 +1253,6 @@ def main():
 
     first_pushed_buttons = 0
     second_pushed_buttons = 0
-    global running, flag_finish, FIRST_HP, SECOND_HP
     running = True
     while running:
         clock.tick(FPS)
@@ -1284,10 +1285,6 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.pos[0] >= 15 and event.pos[0] <= 55:
-                    if event.pos[1] >= 15 and event.pos[1] <= 55:
-                        return
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_w or event.key == pygame.K_s or event.key == pygame.K_a or event.key == pygame.K_d:
                     first_sprites.update('drive')
@@ -1321,9 +1318,6 @@ def main():
         small_box_sprites.update()
         all_sprites.draw(screen)
         print_health()
-        pygame.draw.rect(screen, 'grey', (15, 15, 40, 40))
-        back = pygame.transform.scale(load_image('back.png'), (40, 40))
-        screen.blit(back, (15, 14))
         pygame.display.flip()
     terminate()
 
