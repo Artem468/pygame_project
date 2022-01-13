@@ -63,6 +63,16 @@ tile_images = {
     'wall': load_image('wooden_box.png'),
     'empty': load_image('sand.png')
 }
+
+tile_images2 = {
+    'wall': load_image('iron_box.png'),
+    'empty': load_image('wood.png')
+}
+
+tile_images3 = {
+    'wall': load_image('ice_box.png'),
+    'empty': load_image('snow.png')
+}
 tile_width = tile_height = 90
 
 
@@ -133,7 +143,12 @@ class Border_ver_right(pygame.sprite.Sprite):
 class Tile(Sprite):
     def __init__(self, tile_type, pos_x, pos_y):
         super().__init__(sprite_group)
-        self.image = tile_images[tile_type]
+        if MAP == 'first_map.map':
+            self.image = tile_images[tile_type]
+        elif MAP == 'second_map.map':
+            self.image = tile_images2[tile_type]
+        elif MAP == 'third_map.map':
+            self.image = tile_images3[tile_type]
         self.rect = self.image.get_rect().move(
             tile_width * pos_x, tile_height * pos_y)
 
@@ -159,7 +174,6 @@ def generate_level(level):
                 Border_hor_down(x, y)
                 Border_ver_left(x, y)
                 Border_ver_right(x, y)
-                # Border(x, y)
                 spisok_wall.append(f'{x} {y}')
 
 
@@ -411,7 +425,15 @@ def map_select():
 
     map1 = load_image('map1.jpg')
     map1 = pygame.transform.scale(map1, (150, 150))
-    screen.blit(map1, (width // 3 - map1.get_width() // 2, height // 2 - map1.get_height() // 2))
+    screen.blit(map1, (width // 4 - 100, height // 2 - map1.get_height() // 2))
+
+    map2 = load_image('map2.jpg')
+    map2 = pygame.transform.scale(map2, (150, 150))
+    screen.blit(map2, (width // 2 - map2.get_width() // 2, height // 2 - map2.get_height() // 2))
+
+    map3 = load_image('map3.jpg')
+    map3 = pygame.transform.scale(map3, (150, 150))
+    screen.blit(map3, (width // 3 + width // 3 - map3.get_width() // 2 + 100, height // 2 - map3.get_height() // 2))
 
     while True:
         clock.tick(FPS)
@@ -419,14 +441,28 @@ def map_select():
             if event.type == pygame.QUIT:
                 terminate()
             if event.type == pygame.MOUSEBUTTONDOWN:
+                global MAP
                 if event.pos[0] >= 15 and event.pos[0] <= 55:
                     if event.pos[1] >= 15 and event.pos[1] <= 55:
                         return
                 if event.pos[0] >= width // 3 - map1.get_width() // 2 and event.pos[0] <= (width // 3 - map1.get_width() // 2) + 150:
                     if event.pos[1] >= height // 2 - map1.get_height() // 2 and event.pos[1] <= (height // 2 - map1.get_height() // 2) + 150:
                         start_screen_sound.stop()
-                        global MAP
-                        MAP = 'map.map'
+                        MAP = 'first_map.map'
+                        flag_sound = True
+                        main()
+                        return
+                if width // 2 - map2.get_width() // 2 and event.pos[0] <= (width // 2 - map2.get_width() // 2) + 150:
+                    if event.pos[1] >= height // 2 - map1.get_height() // 2 and event.pos[1] <= (height // 2 - map1.get_height() // 2) + 150:
+                        start_screen_sound.stop()
+                        MAP = 'second_map.map'
+                        flag_sound = True
+                        main()
+                        return
+                if width // 3 + width // 3 - map3.get_width() // 2 + 100 and event.pos[0] <= (width // 3 + width // 3 - map3.get_width() // 2 + 100) + 150:
+                    if event.pos[1] >= height // 2 - map1.get_height() // 2 and event.pos[1] <= (height // 2 - map1.get_height() // 2) + 150:
+                        start_screen_sound.stop()
+                        MAP = 'third_map.map'
                         flag_sound = True
                         main()
                         return
@@ -545,21 +581,27 @@ class Fast_Box(pygame.sprite.Sprite):
     def update(self):
         global FIRST_SPEED, SECOND_SPEED
         if pygame.sprite.spritecollideany(self, first_sprites):
-            self.rect.x, self.rect.y = -100, -100
-            FIRST_SPEED += 2
-            self.time = pygame.time.get_ticks()
-            self.player = 'first'
+            if not first_selff.box_flag:
+                self.rect.x, self.rect.y = -100, -100
+                FIRST_SPEED += 2
+                self.time = pygame.time.get_ticks()
+                self.player = 'first'
+                first_selff.box_flag = True
         elif pygame.sprite.spritecollideany(self, second_sprites):
-            self.rect.x, self.rect.y = -100, -100
-            SECOND_SPEED += 2
-            self.time = pygame.time.get_ticks()
-            self.player = 'second'
+            if not second_selff.box_flag:
+                self.rect.x, self.rect.y = -100, -100
+                SECOND_SPEED += 2
+                self.time = pygame.time.get_ticks()
+                self.player = 'second'
+                second_selff.box_flag = True
         if self.time != 0:
             if pygame.time.get_ticks() - self.time >= 10000:
                 if self.player == 'first':
+                    first_selff.box_flag = False
                     FIRST_SPEED -= 2
                     self.time = 0
                 elif self.player == 'second':
+                    second_selff.box_flag = False
                     SECOND_SPEED -= 2
                     self.time = 0
 
@@ -587,27 +629,33 @@ class Small_Box(pygame.sprite.Sprite):
     def update(self):
         global first_small_flag, second_small_flag, FIRST_SPEED, SECOND_SPEED
         if pygame.sprite.spritecollideany(self, first_sprites):
-            self.rect.x, self.rect.y = -100, -100
-            im = load_image(f'{FIRST_PLAYER}_tank.png')
-            im = pygame.transform.scale(im, (40, 40))
-            First_tank.image = im
-            self.time = pygame.time.get_ticks()
-            self.player = 'first'
-            first_small_flag = 'small'
+            if not first_selff.box_flag:
+                self.rect.x, self.rect.y = -100, -100
+                im = load_image(f'{FIRST_PLAYER}_tank.png')
+                im = pygame.transform.scale(im, (40, 40))
+                First_tank.image = im
+                self.time = pygame.time.get_ticks()
+                self.player = 'first'
+                first_small_flag = 'small'
+                first_selff.box_flag = True
         elif pygame.sprite.spritecollideany(self, second_sprites):
-            self.rect.x, self.rect.y = -100, -100
-            im = load_image(f'{SECOND_PLAYER}_tank.png')
-            im = pygame.transform.scale(im, (40, 40))
-            Second_tank.image = im
-            self.time = pygame.time.get_ticks()
-            self.player = 'second'
-            second_small_flag = 'small'
+            if not second_selff.box_flag:
+                self.rect.x, self.rect.y = -100, -100
+                im = load_image(f'{SECOND_PLAYER}_tank.png')
+                im = pygame.transform.scale(im, (40, 40))
+                Second_tank.image = im
+                self.time = pygame.time.get_ticks()
+                self.player = 'second'
+                second_small_flag = 'small'
+                second_selff.box_flag = True
         if self.time != 0:
             if pygame.time.get_ticks() - self.time >= 10000:
                 if self.player == 'first':
+                    first_selff.box_flag = False
                     first_small_flag = 'big'
                     self.time = 0
                 elif self.player == 'second':
+                    second_selff.box_flag = False
                     second_small_flag = 'big'
                     self.time = 0
 
@@ -636,21 +684,27 @@ class Bullet_Box(pygame.sprite.Sprite):
     def update(self):
         global FIRST_TIME_RELOAD, SECOND_TIME_RELOAD
         if pygame.sprite.spritecollideany(self, first_sprites):
-            self.rect.x, self.rect.y = -100, -100
-            FIRST_TIME_RELOAD = 0
-            self.time = pygame.time.get_ticks()
-            self.player = 'first'
+            if not first_selff.box_flag:
+                self.rect.x, self.rect.y = -100, -100
+                FIRST_TIME_RELOAD = 0
+                self.time = pygame.time.get_ticks()
+                self.player = 'first'
+                first_selff.box_flag = True
         elif pygame.sprite.spritecollideany(self, second_sprites):
-            self.rect.x, self.rect.y = -100, -100
-            SECOND_TIME_RELOAD = 0
-            self.time = pygame.time.get_ticks()
-            self.player = 'second'
+            if not second_selff.box_flag:
+                self.rect.x, self.rect.y = -100, -100
+                SECOND_TIME_RELOAD = 0
+                self.time = pygame.time.get_ticks()
+                self.player = 'second'
+                second_selff.box_flag = True
         if self.time != 0:
             if pygame.time.get_ticks() - self.time >= 10000:
                 if self.player == 'first':
+                    first_selff.box_flag = False
                     FIRST_TIME_RELOAD = 1500
                     self.time = 0
                 elif self.player == 'second':
+                    second_selff.box_flag = False
                     SECOND_TIME_RELOAD = 1500
                     self.time = 0
 
@@ -879,6 +933,7 @@ class First_tank(pygame.sprite.Sprite):
         self.timer = pygame.time
         self.fire_time = 0
         self.drive_flag = False
+        self.box_flag = False
         global first_selff
         first_selff = self
 
@@ -1056,6 +1111,7 @@ class Second_tank(pygame.sprite.Sprite):
         self.timer = pygame.time
         self.fire_time = 0
         self.drive_flag = False
+        self.box_flag = False
         global second_selff
         second_selff = self
 
@@ -1221,7 +1277,7 @@ class Second_tank(pygame.sprite.Sprite):
 
 
 def fight_screen_update():
-    level_map = load_level("map.map")
+    level_map = load_level(MAP)
     generate_level(level_map)
 
 
@@ -1256,7 +1312,7 @@ def main():
     running = True
     while running:
         clock.tick(FPS)
-        if pygame.time.get_ticks() - time >= 7000:
+        if pygame.time.get_ticks() - time >= 15000:
             box = random.choice(['Med_Box', 'Bullet_Box', 'Small_Box', 'Fast_Box'])
             if box == 'Med_Box':
                 Med_Box()
@@ -1309,14 +1365,16 @@ def main():
                     if second_pushed_buttons == 0:
                         second_drive_sound.stop()
                         second_selff.drive_flag = False
-        first_sprites.update(None)
-        second_sprites.update(None)
         bullet_sprites.update()
         med_box_sprites.update()
         fast_box_sprites.update()
         bullet_box_sprites.update()
         small_box_sprites.update()
+        first_sprites.update(None)
+        second_sprites.update(None)
         all_sprites.draw(screen)
+        first_sprites.draw(screen)
+        second_sprites.draw(screen)
         print_health()
         pygame.display.flip()
     terminate()
