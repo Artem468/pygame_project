@@ -209,7 +209,7 @@ class First_tank_preview(pygame.sprite.Sprite):
         super().__init__(*group)
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = -90, 600
-        self.speed = 15
+        self.speed = 5
 
     def update(self, *args):
         self.rect.x += self.speed
@@ -226,7 +226,7 @@ class Second_tank_preview(pygame.sprite.Sprite):
         super().__init__(*group)
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = 900, 700
-        self.speed = 15
+        self.speed = 5
 
     def update(self, *args):
         self.rect.x -= self.speed
