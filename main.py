@@ -21,6 +21,7 @@ down_st_wall = pygame.sprite.Group()
 
 MUSIC = True
 SOUNDS = True
+flag_description = False
 flag_pause = False
 flag_sound = True
 first_small_flag = False
@@ -372,11 +373,18 @@ def start_screen_update():
     settings = pygame.transform.scale(load_image('settings.png'), (40, 40))
     screen.blit(settings, (845, 14))
 
+    font = pygame.font.Font(r'data\teletactile.ttf', 25)
+    string_rendered = font.render('Description', True, pygame.Color('black'))
+    pygame.draw.rect(screen, 'grey', (10, 12, string_rendered.get_width() + 10, string_rendered.get_height() + 3))
+    screen.blit(string_rendered, (15, 15))
+
+    return 10, string_rendered.get_width() + 20, 12, string_rendered.get_height() + 15
+
 
 def start_screen():
-    start_screen_update()
+    x1, x2, y1, y2 = start_screen_update()
     tanks_preview_update()
-    global start_screen_sound, flag_sound
+    global start_screen_sound, flag_sound, flag_description
     while True:
         if flag_sound:
             if MUSIC:
@@ -389,6 +397,9 @@ def start_screen():
             if event.type == pygame.QUIT:
                 terminate()
             if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.pos[0] >= x1 and event.pos[0] <= x2:
+                    if event.pos[1] >= y1 and event.pos[1] <= y2:
+                        flag_description = not flag_description
                 if event.pos[0] >= 845 and event.pos[0] <= 885:
                     if event.pos[1] >= 15 and event.pos[1] <= 55:
                         settings()
@@ -416,6 +427,8 @@ def start_screen():
         tank2.update()
         first_preview_sprites.draw(screen)
         second_preview_sprites.draw(screen)
+        if flag_description:
+            description()
         pygame.display.flip()
 
 
@@ -640,6 +653,64 @@ def settings():
                             else:
                                 screen.blit(toogle_off, (m_x + 300, m_y - 5))
         pygame.display.flip()
+
+
+def description():
+    color = pygame.Surface((430, 430))
+    color.set_alpha(220)
+    color.fill((0, 0, 0))
+    screen.blit(color, (0, 50))
+
+    med_box = pygame.transform.scale(load_image('med_box.jpg'), (60, 60))
+    small_box = pygame.transform.scale(load_image('small_box.jpg'), (60, 60))
+    bullet_box = pygame.transform.scale(load_image('bullet_box.jpg'), (60, 60))
+    fast_box = pygame.transform.scale(load_image('fast_box.jpg'), (60, 60))
+    font = pygame.font.Font(None, 21)
+    font2 = pygame.font.Font(None, 25)
+
+    screen.blit(med_box, (50, 80))
+    text = font2.render('Аптечка', True, pygame.Color('white'))
+    screen.blit(text, (50, 150))
+    text = font.render('Подобрав этот бонус,', True, pygame.Color('white'))
+    screen.blit(text, (20, 180))
+    text = font.render('здоровье Вашего танка', True, pygame.Color('white'))
+    screen.blit(text, (15, 195))
+    text = font.render('увеличится на 50 едпиниц!', True, pygame.Color('white'))
+    screen.blit(text, (10, 210))
+
+    screen.blit(fast_box, (280, 80))
+    text = font2.render('Ускорение', True, pygame.Color('white'))
+    screen.blit(text, (265, 150))
+    text = font.render('Эта суперспособность', True, pygame.Color('white'))
+    screen.blit(text, (235, 180))
+    text = font.render('добавляет скорость', True, pygame.Color('white'))
+    screen.blit(text, (240, 195))
+    text = font.render('Вашему танку на 10 сек.', True, pygame.Color('white'))
+    screen.blit(text, (230, 210))
+
+    screen.blit(bullet_box, (50, 260))
+    text = font2.render('Скорострельность', True, pygame.Color('white'))
+    screen.blit(text, (10, 340))
+    text = font.render('С помощью этого', True, pygame.Color('white'))
+    screen.blit(text, (25, 370))
+    text = font.render('улучшения, скорость', True, pygame.Color('white'))
+    screen.blit(text, (15, 385))
+    text = font.render('перезарядки у Вашего', True, pygame.Color('white'))
+    screen.blit(text, (10, 400))
+    text = font.render('танка станет равна 0', True, pygame.Color('white'))
+    screen.blit(text, (15, 415))
+    text = font.render('на 10 секунд!', True, pygame.Color('white'))
+    screen.blit(text, (30, 430))
+
+    screen.blit(small_box, (280, 260))
+    text = font2.render('Уменьшение', True, pygame.Color('white'))
+    screen.blit(text, (260, 340))
+    text = font.render('Данная суперспособность', True, pygame.Color('white'))
+    screen.blit(text, (225, 370))
+    text = font.render('уменьшает Ваш танк', True, pygame.Color('white'))
+    screen.blit(text, (240, 385))
+    text = font.render('почти в 2 раза на 10 сек.', True, pygame.Color('white'))
+    screen.blit(text, (230, 400))
 
 
 med_box_sprites = pygame.sprite.Group()
