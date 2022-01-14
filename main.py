@@ -19,6 +19,9 @@ left_st_wall = pygame.sprite.Group()
 up_st_wall = pygame.sprite.Group()
 down_st_wall = pygame.sprite.Group()
 
+MUSIC = True
+SOUNDS = True
+flag_pause = False
 flag_sound = True
 first_small_flag = False
 second_small_flag = False
@@ -33,6 +36,8 @@ FIRST_PLAYER = 'blue'
 SECOND_PLAYER = 'red'
 FIRST_HP = 100
 SECOND_HP = 100
+box_sound = pygame.mixer.Sound('data/box_sound.mp3')
+box_sound.set_volume(0.4)
 
 first_drive_sound = pygame.mixer.Sound('data/drive_sound.mp3')
 second_drive_sound = pygame.mixer.Sound('data/drive_sound.mp3')
@@ -363,6 +368,10 @@ def start_screen_update():
     intro_rect.y = 405
     screen.blit(string_rendered, intro_rect)
 
+    pygame.draw.rect(screen, 'grey', (845, 15, 40, 40))
+    settings = pygame.transform.scale(load_image('settings.png'), (40, 40))
+    screen.blit(settings, (845, 14))
+
 
 def start_screen():
     start_screen_update()
@@ -370,15 +379,21 @@ def start_screen():
     global start_screen_sound, flag_sound
     while True:
         if flag_sound:
-            start_screen_sound = pygame.mixer.Sound('data/sound_lobby.mp3')
-            start_screen_sound.play(-1)
-            start_screen_sound.set_volume(0.5)
-            flag_sound = False
+            if MUSIC:
+                start_screen_sound = pygame.mixer.Sound('data/sound_lobby.mp3')
+                start_screen_sound.play(-1)
+                start_screen_sound.set_volume(0.5)
+                flag_sound = False
         clock.tick(FPS)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
             if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.pos[0] >= 845 and event.pos[0] <= 885:
+                    if event.pos[1] >= 15 and event.pos[1] <= 55:
+                        settings()
+                        start_screen_update()
+                        tanks_preview_update()
                 if event.pos[0] >= 365 and event.pos[0] <= 530:
                     if event.pos[1] >= 300 and event.pos[1] <= 350:
                         tank1.rect.x = -200
@@ -445,21 +460,21 @@ def map_select():
                 if event.pos[0] >= 15 and event.pos[0] <= 55:
                     if event.pos[1] >= 15 and event.pos[1] <= 55:
                         return
-                if event.pos[0] >= width // 3 - map1.get_width() // 2 and event.pos[0] <= (width // 3 - map1.get_width() // 2) + 150:
+                if event.pos[0] >= width // 4 - 100 and event.pos[0] <= (width // 4 - 100) + 150:
                     if event.pos[1] >= height // 2 - map1.get_height() // 2 and event.pos[1] <= (height // 2 - map1.get_height() // 2) + 150:
                         start_screen_sound.stop()
                         MAP = 'first_map.map'
                         flag_sound = True
                         main()
                         return
-                if width // 2 - map2.get_width() // 2 and event.pos[0] <= (width // 2 - map2.get_width() // 2) + 150:
+                if event.pos[0] >= width // 2 - map2.get_width() // 2 and event.pos[0] <= (width // 2 - map2.get_width() // 2) + 150:
                     if event.pos[1] >= height // 2 - map1.get_height() // 2 and event.pos[1] <= (height // 2 - map1.get_height() // 2) + 150:
                         start_screen_sound.stop()
                         MAP = 'second_map.map'
                         flag_sound = True
                         main()
                         return
-                if width // 3 + width // 3 - map3.get_width() // 2 + 100 and event.pos[0] <= (width // 3 + width // 3 - map3.get_width() // 2 + 100) + 150:
+                if event.pos[0] >= width // 3 + width // 3 - map3.get_width() // 2 + 100 and event.pos[0] <= (width // 3 + width // 3 - map3.get_width() // 2 + 100) + 150:
                     if event.pos[1] >= height // 2 - map1.get_height() // 2 and event.pos[1] <= (height // 2 - map1.get_height() // 2) + 150:
                         start_screen_sound.stop()
                         MAP = 'third_map.map'
@@ -522,6 +537,111 @@ def finish_screen(player):
         pygame.display.flip()
 
 
+def settings_update():
+    fon = pygame.transform.scale(load_image('background.png'), size)
+    screen.blit(fon, (0, 0))
+    font = pygame.font.Font(r'data\teletactile.ttf', 50)
+    text_coord = width // 2
+    string_rendered = font.render('Settings', True, pygame.Color('black'))
+    intro_rect = string_rendered.get_rect()
+    text_coord -= string_rendered.get_width() // 2
+    intro_rect.top = 20
+    intro_rect.x = text_coord
+    pygame.draw.rect(screen, 'green',
+                     (intro_rect.x - 5, intro_rect.y - 6, intro_rect.width + 8, intro_rect.height + 8))
+    screen.blit(string_rendered, intro_rect)
+
+    font = pygame.font.Font(r'data\teletactile.ttf', 50)
+    string_rendered = font.render('Music', True, pygame.Color('black'))
+    music_text_coord_x = width // 2 - string_rendered.get_width() // 2
+    music_text_coord_y = height // 2 - string_rendered.get_height()
+    pygame.draw.rect(screen, 'green',
+                     (music_text_coord_x - 5, music_text_coord_y - 6, string_rendered.get_width() + 8,
+                      string_rendered.get_height() + 8))
+    screen.blit(string_rendered, (music_text_coord_x, music_text_coord_y))
+
+
+    string_rendered = font.render('Sounds', True, pygame.Color('black'))
+    sound_text_coord_x = width // 2 - string_rendered.get_width() // 2
+    sound_text_coord_y = height // 2 + string_rendered.get_height()
+    pygame.draw.rect(screen, 'green',
+                     (sound_text_coord_x - 5, sound_text_coord_y - 6, string_rendered.get_width() + 8,
+                      string_rendered.get_height() + 8))
+    screen.blit(string_rendered, (sound_text_coord_x, sound_text_coord_y))
+
+    pygame.draw.rect(screen, 'grey', (15, 15, 40, 40))
+    back = pygame.transform.scale(load_image('back.png'), (40, 40))
+    screen.blit(back, (15, 14))
+
+    return music_text_coord_x, music_text_coord_y, sound_text_coord_x, sound_text_coord_y
+
+
+def settings():
+    global MUSIC, SOUNDS, start_screen_sound, flag_sound
+    m_x, m_y, s_x, s_y = settings_update()
+    toogle_on = load_image('toogle_on.png')
+    toogle_off = load_image('toogle_off.png')
+
+    if MUSIC:
+        screen.blit(toogle_on, (m_x + 300, m_y - 5))
+    else:
+        screen.blit(toogle_off, (m_x + 300, m_y - 5))
+    if SOUNDS:
+        screen.blit(toogle_on, (s_x + 320, s_y - 5))
+    else:
+        screen.blit(toogle_off, (s_x + 320, s_y - 5))
+
+    while True:
+        clock.tick(FPS)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.pos[0] >= 15 and event.pos[0] <= 55:
+                    if event.pos[1] >= 15 and event.pos[1] <= 55:
+                        return
+                if event.pos[0] >= m_x + 300 and event.pos[0] <= m_x + 348:
+                    if event.pos[1] >= m_y - 5 and event.pos[1] <= m_y + 43:
+                        settings_update()
+                        if MUSIC:
+                            screen.blit(toogle_off, (m_x + 300, m_y - 5))
+                            MUSIC = False
+                            start_screen_sound.stop()
+                            flag_sound = True
+                            if SOUNDS:
+                                screen.blit(toogle_on, (s_x + 320, s_y - 5))
+                            else:
+                                screen.blit(toogle_off, (s_x + 320, s_y - 5))
+                        else:
+                            screen.blit(toogle_on, (m_x + 300, m_y - 5))
+                            MUSIC = True
+                            if flag_sound:
+                                start_screen_sound.play(-1)
+                                flag_sound = False
+                            if SOUNDS:
+                                screen.blit(toogle_on, (s_x + 320, s_y - 5))
+                            else:
+                                screen.blit(toogle_off, (s_x + 320, s_y - 5))
+                if event.pos[0] >= s_x + 320 and event.pos[0] <= s_x + 368:
+                    if event.pos[1] >= s_y - 5 and event.pos[1] <= s_y + 43:
+                        settings_update()
+                        if SOUNDS:
+                            screen.blit(toogle_off, (s_x + 320, s_y - 5))
+                            SOUNDS = False
+                            if MUSIC:
+                                screen.blit(toogle_on, (m_x + 300, m_y - 5))
+                            else:
+                                screen.blit(toogle_off, (m_x + 300, m_y - 5))
+                        else:
+                            screen.blit(toogle_on, (s_x + 320, s_y - 5))
+                            SOUNDS = True
+                            if MUSIC:
+                                screen.blit(toogle_on, (m_x + 300, m_y - 5))
+                            else:
+                                screen.blit(toogle_off, (m_x + 300, m_y - 5))
+        pygame.display.flip()
+
+
 med_box_sprites = pygame.sprite.Group()
 fast_box_sprites = pygame.sprite.Group()
 small_box_sprites = pygame.sprite.Group()
@@ -548,13 +668,23 @@ class Med_Box(pygame.sprite.Sprite):
                 self.rect.y = y * 90 + 22
 
     def update(self):
-        global FIRST_HP, SECOND_HP
+        global FIRST_HP, SECOND_HP, box_sound
         if pygame.sprite.spritecollideany(self, first_sprites):
+            if SOUNDS:
+                box_sound.play()
             self.rect.x, self.rect.y = -100, -100
-            FIRST_HP = 100
+            if FIRST_HP >= 50:
+                FIRST_HP = 100
+            else:
+                FIRST_HP += 50
         elif pygame.sprite.spritecollideany(self, second_sprites):
+            if SOUNDS:
+                box_sound.play()
             self.rect.x, self.rect.y = -100, -100
-            SECOND_HP = 100
+            if SECOND_HP >= 50:
+                SECOND_HP = 100
+            else:
+                SECOND_HP += 50
 
 
 class Fast_Box(pygame.sprite.Sprite):
@@ -579,9 +709,11 @@ class Fast_Box(pygame.sprite.Sprite):
                 self.rect.y = y * 90 + 22
 
     def update(self):
-        global FIRST_SPEED, SECOND_SPEED
+        global FIRST_SPEED, SECOND_SPEED, box_sound
         if pygame.sprite.spritecollideany(self, first_sprites):
             if not first_selff.box_flag:
+                if SOUNDS:
+                    box_sound.play()
                 self.rect.x, self.rect.y = -100, -100
                 FIRST_SPEED += 2
                 self.time = pygame.time.get_ticks()
@@ -589,6 +721,8 @@ class Fast_Box(pygame.sprite.Sprite):
                 first_selff.box_flag = True
         elif pygame.sprite.spritecollideany(self, second_sprites):
             if not second_selff.box_flag:
+                if SOUNDS:
+                    box_sound.play()
                 self.rect.x, self.rect.y = -100, -100
                 SECOND_SPEED += 2
                 self.time = pygame.time.get_ticks()
@@ -627,23 +761,21 @@ class Small_Box(pygame.sprite.Sprite):
                 self.rect.y = y * 90 + 22
 
     def update(self):
-        global first_small_flag, second_small_flag, FIRST_SPEED, SECOND_SPEED
+        global first_small_flag, second_small_flag, FIRST_SPEED, SECOND_SPEED, box_sound
         if pygame.sprite.spritecollideany(self, first_sprites):
             if not first_selff.box_flag:
+                if SOUNDS:
+                    box_sound.play()
                 self.rect.x, self.rect.y = -100, -100
-                im = load_image(f'{FIRST_PLAYER}_tank.png')
-                im = pygame.transform.scale(im, (40, 40))
-                First_tank.image = im
                 self.time = pygame.time.get_ticks()
                 self.player = 'first'
                 first_small_flag = 'small'
                 first_selff.box_flag = True
         elif pygame.sprite.spritecollideany(self, second_sprites):
             if not second_selff.box_flag:
+                if SOUNDS:
+                    box_sound.play()
                 self.rect.x, self.rect.y = -100, -100
-                im = load_image(f'{SECOND_PLAYER}_tank.png')
-                im = pygame.transform.scale(im, (40, 40))
-                Second_tank.image = im
                 self.time = pygame.time.get_ticks()
                 self.player = 'second'
                 second_small_flag = 'small'
@@ -682,9 +814,11 @@ class Bullet_Box(pygame.sprite.Sprite):
                 self.rect.y = y * 90 + 22
 
     def update(self):
-        global FIRST_TIME_RELOAD, SECOND_TIME_RELOAD
+        global FIRST_TIME_RELOAD, SECOND_TIME_RELOAD, box_sound
         if pygame.sprite.spritecollideany(self, first_sprites):
             if not first_selff.box_flag:
+                if SOUNDS:
+                    box_sound.play()
                 self.rect.x, self.rect.y = -100, -100
                 FIRST_TIME_RELOAD = 0
                 self.time = pygame.time.get_ticks()
@@ -692,6 +826,8 @@ class Bullet_Box(pygame.sprite.Sprite):
                 first_selff.box_flag = True
         elif pygame.sprite.spritecollideany(self, second_sprites):
             if not second_selff.box_flag:
+                if SOUNDS:
+                    box_sound.play()
                 self.rect.x, self.rect.y = -100, -100
                 SECOND_TIME_RELOAD = 0
                 self.time = pygame.time.get_ticks()
@@ -770,9 +906,10 @@ class Bullet(pygame.sprite.Sprite):
                                             cells = round(abs(self.x1 - self.rect.x) / 90)
                                         hit_random = random.choice([0, 50, 50, 100])
                                         if hit_random == 100:
-                                            popal = pygame.mixer.Sound('data/damage_100.mp3')
-                                            popal.play()
-                                            popal.set_volume(0.3)
+                                            if SOUNDS:
+                                                popal = pygame.mixer.Sound('data/damage_100.mp3')
+                                                popal.play()
+                                                popal.set_volume(0.3)
                                             im = load_image('boom.png', -1)
                                             im = pygame.transform.scale(im, (85, 75))
                                             self.image = im
@@ -781,9 +918,10 @@ class Bullet(pygame.sprite.Sprite):
                                             self.flag_move = False
                                             self.flag = True
                                         elif hit_random == 50:
-                                            popal = pygame.mixer.Sound('data/damage_50.mp3')
-                                            popal.play()
-                                            popal.set_volume(0.3)
+                                            if SOUNDS:
+                                                popal = pygame.mixer.Sound('data/damage_50.mp3')
+                                                popal.play()
+                                                popal.set_volume(0.3)
                                             im = load_image('boom.png', -1)
                                             im = pygame.transform.scale(im, (50, 40))
                                             self.image = im
@@ -792,9 +930,10 @@ class Bullet(pygame.sprite.Sprite):
                                             self.flag_move = False
                                             self.flag = True
                                         else:
-                                            ricochet_sound = pygame.mixer.Sound('data/ricochet.mp3')
-                                            ricochet_sound.play()
-                                            ricochet_sound.set_volume(0.3)
+                                            if SOUNDS:
+                                                ricochet_sound = pygame.mixer.Sound('data/ricochet.mp3')
+                                                ricochet_sound.play()
+                                                ricochet_sound.set_volume(0.3)
                                             if self.direction == 'up':
                                                 self.rect.y += 6
                                                 self.direction = 'down'
@@ -811,15 +950,17 @@ class Bullet(pygame.sprite.Sprite):
                                                 self.rect.x -= 6
                                                 self.direction = 'left'
                                                 self.image = pygame.transform.rotate(self.image, 180)
+                                            self.x1, self.y1 = self.rect.x, self.rect.y
                                         hit_hp = 100 - cells * 10
                                         hit_hp = hit_random * hit_hp // 100
                                         global SECOND_HP
                                         SECOND_HP -= hit_hp
                                         if SECOND_HP <= 0:
                                             SECOND_HP = 0
-                                            boom_sound = pygame.mixer.Sound('data/boom_tank.mp3')
-                                            boom_sound.play()
-                                            boom_sound.set_volume(0.4)
+                                            if SOUNDS:
+                                                boom_sound = pygame.mixer.Sound('data/boom_tank.mp3')
+                                                boom_sound.play()
+                                                boom_sound.set_volume(0.4)
                                             flag_finish = 'First player'
                                         if self.direction == 'left':
                                             self.rect.move_ip(-35, -30)
@@ -839,7 +980,8 @@ class Bullet(pygame.sprite.Sprite):
                                     popal = pygame.mixer.Sound('data/damage_100.mp3')
                                     popal.set_volume(0.3)
                                     if hit_random == 100:
-                                        popal.play()
+                                        if SOUNDS:
+                                            popal.play()
                                         im = load_image('boom.png', -1)
                                         im = pygame.transform.scale(im, (85, 75))
                                         self.image = im
@@ -848,7 +990,8 @@ class Bullet(pygame.sprite.Sprite):
                                         self.flag_move = False
                                         self.flag = True
                                     elif hit_random == 50:
-                                        popal.play()
+                                        if SOUNDS:
+                                            popal.play()
                                         im = load_image('boom.png', -1)
                                         im = pygame.transform.scale(im, (50, 40))
                                         self.image = im
@@ -857,9 +1000,10 @@ class Bullet(pygame.sprite.Sprite):
                                         self.flag_move = False
                                         self.flag = True
                                     else:
-                                        ricochet_sound = pygame.mixer.Sound('data/ricochet.mp3')
-                                        ricochet_sound.play()
-                                        ricochet_sound.set_volume(0.3)
+                                        if SOUNDS:
+                                            ricochet_sound = pygame.mixer.Sound('data/ricochet.mp3')
+                                            ricochet_sound.play()
+                                            ricochet_sound.set_volume(0.3)
                                         if self.direction == 'up':
                                             self.rect.y += 6
                                             self.direction = 'down'
@@ -876,15 +1020,17 @@ class Bullet(pygame.sprite.Sprite):
                                             self.rect.x -= 6
                                             self.direction = 'left'
                                             self.image = pygame.transform.rotate(self.image, 180)
+                                        self.x1, self.y1 = self.rect.x, self.rect.y
                                     hit_hp = 100 - cells * 10
                                     hit_hp = hit_random * hit_hp // 100
                                     global FIRST_HP
                                     FIRST_HP -= hit_hp
                                     if FIRST_HP <= 0:
                                         FIRST_HP = 0
-                                        boom_sound = pygame.mixer.Sound('data/boom_tank.mp3')
-                                        boom_sound.play()
-                                        boom_sound.set_volume(0.4)
+                                        if SOUNDS:
+                                            boom_sound = pygame.mixer.Sound('data/boom_tank.mp3')
+                                            boom_sound.play()
+                                            boom_sound.set_volume(0.4)
                                         flag_finish = 'Second player'
                                     if self.direction == 'left':
                                         self.rect.move_ip(-35, -30)
@@ -942,7 +1088,7 @@ class First_tank(pygame.sprite.Sprite):
         if first_small_flag == 'small':
             first_small_flag = ''
             im = load_image(f'{FIRST_PLAYER}_tank.png')
-            im = pygame.transform.scale(im, (40, 40))
+            im = pygame.transform.scale(im, (50, 50))
             self.image = im
             x, y = self.rect.x, self.rect.y
             self.rect = self.image.get_rect()
@@ -982,8 +1128,9 @@ class First_tank(pygame.sprite.Sprite):
         if action == 'drive':
             if not self.drive_flag:
                 global first_drive_sound
-                first_drive_sound.play(-1)
-                first_drive_sound.set_volume(0.3)
+                if SOUNDS:
+                    first_drive_sound.play(-1)
+                    first_drive_sound.set_volume(0.3)
                 self.drive_flag = True
         self.speedx = 0
         self.speedy = 0
@@ -1033,9 +1180,10 @@ class First_tank(pygame.sprite.Sprite):
                 self.fire_time = self.timer.get_ticks()
                 bullet = Bullet(bullet_sprites)
                 all_sprites.add(bullet_sprites)
-                fire_sound = pygame.mixer.Sound('data/fire_sound.mp3')
-                fire_sound.play()
-                fire_sound.set_volume(0.4)
+                if SOUNDS:
+                    fire_sound = pygame.mixer.Sound('data/fire_sound.mp3')
+                    fire_sound.play()
+                    fire_sound.set_volume(0.4)
                 if self.direction == 'left':
                     bullet.rect.x = self.rect.x + self.image.get_width() // 2 - 67
                     bullet.rect.y = self.rect.y + self.image.get_height() // 2 - 5
@@ -1087,6 +1235,13 @@ class First_tank(pygame.sprite.Sprite):
                 bullet.flag_move = True
         self.rect.y += self.speedy
         self.rect.x += self.speedx
+        if FIRST_SPEED == 3:
+            if pygame.sprite.spritecollideany(self, left_st_wall) or pygame.sprite.spritecollideany(self, right_st_wall):
+                self.rect.x -= self.speedx
+                print('ok x')
+            elif pygame.sprite.spritecollideany(self, up_st_wall) or pygame.sprite.spritecollideany(self, down_st_wall):
+                self.rect.y -= self.speedy
+                print('ok y')
         if self.rect.right > 900:
             self.rect.right = 900
         if self.rect.left < 0:
@@ -1120,7 +1275,7 @@ class Second_tank(pygame.sprite.Sprite):
         if second_small_flag == 'small':
             second_small_flag = ''
             im = load_image(f'{SECOND_PLAYER}_tank.png')
-            im = pygame.transform.scale(im, (40, 40))
+            im = pygame.transform.scale(im, (50, 50))
             self.image = im
             x, y = self.rect.x, self.rect.y
             self.rect = self.image.get_rect()
@@ -1161,8 +1316,9 @@ class Second_tank(pygame.sprite.Sprite):
         if action == 'drive':
             if not self.drive_flag:
                 global second_drive_sound
-                second_drive_sound.play(-1)
-                second_drive_sound.set_volume(0.3)
+                if SOUNDS:
+                    second_drive_sound.play(-1)
+                    second_drive_sound.set_volume(0.3)
                 self.drive_flag = True
         self.speedx = 0
         self.speedy = 0
@@ -1212,9 +1368,10 @@ class Second_tank(pygame.sprite.Sprite):
                 self.fire_time = self.timer.get_ticks()
                 bullet = Bullet(bullet_sprites)
                 all_sprites.add(bullet_sprites)
-                fire_sound = pygame.mixer.Sound('data/fire_sound.mp3')
-                fire_sound.play()
-                fire_sound.set_volume(0.4)
+                if SOUNDS:
+                    fire_sound = pygame.mixer.Sound('data/fire_sound.mp3')
+                    fire_sound.play()
+                    fire_sound.set_volume(0.4)
                 if self.direction == 'left':
                     bullet.rect.x = self.rect.x + self.image.get_width() // 2 - 67
                     bullet.rect.y = self.rect.y + self.image.get_height() // 2 - 5
@@ -1282,7 +1439,7 @@ def fight_screen_update():
 
 
 def main():
-    global first_sprites, second_sprites
+    global first_sprites, second_sprites, flag_pause
     global first_drive_sound, second_drive_sound
     global running, flag_finish, FIRST_HP, SECOND_HP
     first_sprites = pygame.sprite.Group()
@@ -1313,7 +1470,7 @@ def main():
     while running:
         clock.tick(FPS)
         if pygame.time.get_ticks() - time >= 15000:
-            box = random.choice(['Med_Box', 'Bullet_Box', 'Small_Box', 'Fast_Box'])
+            box = random.choice(['Small_Box', 'Bullet_Box', 'Med_Box', 'Fast_Box'])
             if box == 'Med_Box':
                 Med_Box()
                 all_sprites.add(med_box_sprites)
@@ -1342,18 +1499,25 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_w or event.key == pygame.K_s or event.key == pygame.K_a or event.key == pygame.K_d:
-                    first_sprites.update('drive')
-                    first_selff.drive_flag = True
-                    first_pushed_buttons += 1
-                if event.key == pygame.K_UP or event.key == pygame.K_DOWN or event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
-                    second_sprites.update('drive')
-                    second_selff.drive_flag = True
-                    second_pushed_buttons += 1
-                if event.key == pygame.K_LSHIFT:
-                    first_sprites.update('fire')
-                if event.key == pygame.K_RSHIFT:
-                    second_sprites.update('fire')
+                if event.key == pygame.K_p:
+                    flag_pause = not flag_pause
+                    color = pygame.Surface((900, 900))
+                    color.set_alpha(200)
+                    color.fill((0, 0, 0))
+                    screen.blit(color, (0, 0))
+                if not flag_pause:
+                    if event.key == pygame.K_w or event.key == pygame.K_s or event.key == pygame.K_a or event.key == pygame.K_d:
+                        first_sprites.update('drive')
+                        first_selff.drive_flag = True
+                        first_pushed_buttons += 1
+                    if event.key == pygame.K_UP or event.key == pygame.K_DOWN or event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
+                        second_sprites.update('drive')
+                        second_selff.drive_flag = True
+                        second_pushed_buttons += 1
+                    if event.key == pygame.K_LSHIFT:
+                        first_sprites.update('fire')
+                    if event.key == pygame.K_RSHIFT:
+                        second_sprites.update('fire')
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_w or event.key == pygame.K_s or event.key == pygame.K_a or event.key == pygame.K_d:
                     first_pushed_buttons -= 1
@@ -1365,17 +1529,18 @@ def main():
                     if second_pushed_buttons == 0:
                         second_drive_sound.stop()
                         second_selff.drive_flag = False
-        bullet_sprites.update()
-        med_box_sprites.update()
-        fast_box_sprites.update()
-        bullet_box_sprites.update()
-        small_box_sprites.update()
-        first_sprites.update(None)
-        second_sprites.update(None)
-        all_sprites.draw(screen)
-        first_sprites.draw(screen)
-        second_sprites.draw(screen)
-        print_health()
+        if not flag_pause:
+            bullet_sprites.update()
+            med_box_sprites.update()
+            fast_box_sprites.update()
+            bullet_box_sprites.update()
+            small_box_sprites.update()
+            first_sprites.update(None)
+            second_sprites.update(None)
+            all_sprites.draw(screen)
+            first_sprites.draw(screen)
+            second_sprites.draw(screen)
+            print_health()
         pygame.display.flip()
     terminate()
 
