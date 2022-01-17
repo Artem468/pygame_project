@@ -1216,6 +1216,8 @@ class First_tank(pygame.sprite.Sprite):
                 elif self.direction == 'down':
                     self.image = pygame.transform.rotate(self.image, 270)
                 self.direction = 'left'
+            else:
+                print('left wall')
         if keystate[pygame.K_d]:
             if not pygame.sprite.spritecollideany(self, right_st_wall):
                 self.speedx = FIRST_SPEED
@@ -1226,6 +1228,8 @@ class First_tank(pygame.sprite.Sprite):
                 elif self.direction == 'down':
                     self.image = pygame.transform.rotate(self.image, 90)
                 self.direction = 'right'
+            else:
+                print('right wall')
         if keystate[pygame.K_w]:
             if not pygame.sprite.spritecollideany(self, down_st_wall):
                 self.speedy = -FIRST_SPEED
@@ -1236,6 +1240,8 @@ class First_tank(pygame.sprite.Sprite):
                 elif self.direction == 'right':
                     self.image = pygame.transform.rotate(self.image, 90)
                 self.direction = 'up'
+            else:
+                print('down wall')
         if keystate[pygame.K_s]:
             if not pygame.sprite.spritecollideany(self, up_st_wall):
                 self.speedy = FIRST_SPEED
@@ -1246,6 +1252,8 @@ class First_tank(pygame.sprite.Sprite):
                 elif self.direction == 'right':
                     self.image = pygame.transform.rotate(self.image, 270)
                 self.direction = 'down'
+            else:
+                print('up wall')
         if action == 'fire':
             if self.timer.get_ticks() - self.fire_time >= FIRST_TIME_RELOAD:
                 self.fire_time = self.timer.get_ticks()
@@ -1307,12 +1315,14 @@ class First_tank(pygame.sprite.Sprite):
         self.rect.y += self.speedy
         self.rect.x += self.speedx
         if FIRST_SPEED == 3:
-            if pygame.sprite.spritecollideany(self, left_st_wall) or pygame.sprite.spritecollideany(self, right_st_wall):
-                self.rect.x -= self.speedx
-                print('ok x')
-            elif pygame.sprite.spritecollideany(self, up_st_wall) or pygame.sprite.spritecollideany(self, down_st_wall):
-                self.rect.y -= self.speedy
-                print('ok y')
+            if pygame.sprite.spritecollideany(self, down_st_wall) and pygame.sprite.spritecollideany(self, left_st_wall) and pygame.sprite.spritecollideany(self, right_st_wall):
+                self.rect.y += 2
+            elif pygame.sprite.spritecollideany(self, up_st_wall) and pygame.sprite.spritecollideany(self, left_st_wall) and pygame.sprite.spritecollideany(self, right_st_wall):
+                self.rect.y -= 2
+            elif pygame.sprite.spritecollideany(self, down_st_wall) and pygame.sprite.spritecollideany(self, left_st_wall) and pygame.sprite.spritecollideany(self, up_st_wall):
+                self.rect.x -= 2
+            elif pygame.sprite.spritecollideany(self, down_st_wall) and pygame.sprite.spritecollideany(self, up_st_wall) and pygame.sprite.spritecollideany(self, right_st_wall):
+                self.rect.x += 2
         if self.rect.right > 900:
             self.rect.right = 900
         if self.rect.left < 0:
@@ -1541,7 +1551,7 @@ def main():
     while running:
         clock.tick(FPS)
         if pygame.time.get_ticks() - time >= 15000:
-            box = random.choice(['Small_Box', 'Bullet_Box', 'Med_Box', 'Fast_Box'])
+            box = random.choice(['Fast_Box'])
             if box == 'Med_Box':
                 Med_Box()
                 all_sprites.add(med_box_sprites)
