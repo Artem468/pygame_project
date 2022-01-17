@@ -675,7 +675,7 @@ def description():
     screen.blit(text, (20, 180))
     text = font.render('здоровье Вашего танка', True, pygame.Color('white'))
     screen.blit(text, (15, 195))
-    text = font.render('увеличится на 50 едпиниц!', True, pygame.Color('white'))
+    text = font.render('увеличится на 50 единиц!', True, pygame.Color('white'))
     screen.blit(text, (10, 210))
 
     screen.blit(fast_box, (280, 80))
@@ -1216,8 +1216,6 @@ class First_tank(pygame.sprite.Sprite):
                 elif self.direction == 'down':
                     self.image = pygame.transform.rotate(self.image, 270)
                 self.direction = 'left'
-            else:
-                print('left wall')
         if keystate[pygame.K_d]:
             if not pygame.sprite.spritecollideany(self, right_st_wall):
                 self.speedx = FIRST_SPEED
@@ -1228,8 +1226,6 @@ class First_tank(pygame.sprite.Sprite):
                 elif self.direction == 'down':
                     self.image = pygame.transform.rotate(self.image, 90)
                 self.direction = 'right'
-            else:
-                print('right wall')
         if keystate[pygame.K_w]:
             if not pygame.sprite.spritecollideany(self, down_st_wall):
                 self.speedy = -FIRST_SPEED
@@ -1240,8 +1236,6 @@ class First_tank(pygame.sprite.Sprite):
                 elif self.direction == 'right':
                     self.image = pygame.transform.rotate(self.image, 90)
                 self.direction = 'up'
-            else:
-                print('down wall')
         if keystate[pygame.K_s]:
             if not pygame.sprite.spritecollideany(self, up_st_wall):
                 self.speedy = FIRST_SPEED
@@ -1252,8 +1246,6 @@ class First_tank(pygame.sprite.Sprite):
                 elif self.direction == 'right':
                     self.image = pygame.transform.rotate(self.image, 270)
                 self.direction = 'down'
-            else:
-                print('up wall')
         if action == 'fire':
             if self.timer.get_ticks() - self.fire_time >= FIRST_TIME_RELOAD:
                 self.fire_time = self.timer.get_ticks()
@@ -1504,6 +1496,15 @@ class Second_tank(pygame.sprite.Sprite):
                 bullet.flag_move = True
         self.rect.y += self.speedy
         self.rect.x += self.speedx
+        if SECOND_SPEED == 3:
+            if pygame.sprite.spritecollideany(self, down_st_wall) and pygame.sprite.spritecollideany(self, left_st_wall) and pygame.sprite.spritecollideany(self, right_st_wall):
+                self.rect.y += 2
+            elif pygame.sprite.spritecollideany(self, up_st_wall) and pygame.sprite.spritecollideany(self, left_st_wall) and pygame.sprite.spritecollideany(self, right_st_wall):
+                self.rect.y -= 2
+            elif pygame.sprite.spritecollideany(self, down_st_wall) and pygame.sprite.spritecollideany(self, left_st_wall) and pygame.sprite.spritecollideany(self, up_st_wall):
+                self.rect.x -= 2
+            elif pygame.sprite.spritecollideany(self, down_st_wall) and pygame.sprite.spritecollideany(self, up_st_wall) and pygame.sprite.spritecollideany(self, right_st_wall):
+                self.rect.x += 2
         if self.rect.right > 900:
             self.rect.right = 900
         if self.rect.left < 0:
@@ -1523,6 +1524,7 @@ def main():
     global first_sprites, second_sprites, flag_pause
     global first_drive_sound, second_drive_sound
     global running, flag_finish, FIRST_HP, SECOND_HP
+    global up_st_wall, down_st_wall, left_st_wall, right_st_wall
     first_sprites = pygame.sprite.Group()
     first_tank = First_tank(first_sprites)
     im = load_image(f'{FIRST_PLAYER}_tank.png')
@@ -1551,7 +1553,7 @@ def main():
     while running:
         clock.tick(FPS)
         if pygame.time.get_ticks() - time >= 15000:
-            box = random.choice(['Fast_Box'])
+            box = random.choice(['Small_Box', 'Bullet_Box', 'Med_Box', 'Fast_Box'])
             if box == 'Med_Box':
                 Med_Box()
                 all_sprites.add(med_box_sprites)
@@ -1575,6 +1577,10 @@ def main():
             flag_finish = ''
             FIRST_HP = 100
             SECOND_HP = 100
+            up_st_wall = pygame.sprite.Group()
+            down_st_wall = pygame.sprite.Group()
+            left_st_wall = pygame.sprite.Group()
+            right_st_wall = pygame.sprite.Group()
             return
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
