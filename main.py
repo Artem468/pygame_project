@@ -822,6 +822,7 @@ class Small_Box(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = -100, -100
         self.time = 0
+        self.player = ''
         while flag:
             x = random.randint(0, 9)
             y = random.randint(0, 9)
@@ -1151,30 +1152,19 @@ class First_tank(pygame.sprite.Sprite):
         self.fire_time = 0
         self.drive_flag = False
         self.box_flag = False
+        self.a = 80
+        self.time_scale = 0
         global first_selff
         first_selff = self
 
     def update(self, action):
-        global first_small_flag, flag_finish
-        if first_small_flag == 'small':
-            first_small_flag = ''
+        global first_small_flag, flag_finish, FIRST_SPEED
+        if first_small_flag == 'big' and pygame.time.get_ticks() - self.time_scale >= 100:
+            FIRST_SPEED = 0
+            self.time_scale = pygame.time.get_ticks()
             im = load_image(f'{FIRST_PLAYER}_tank.png')
-            im = pygame.transform.scale(im, (50, 50))
-            self.image = im
-            x, y = self.rect.x, self.rect.y
-            self.rect = self.image.get_rect()
-            self.rect.x = x + 20
-            self.rect.y = y + 20
-            if self.direction == 'down':
-                self.image = pygame.transform.rotate(self.image, 180)
-            elif self.direction == 'left':
-                self.image = pygame.transform.rotate(self.image, 90)
-            elif self.direction == 'right':
-                self.image = pygame.transform.rotate(self.image, 270)
-        elif first_small_flag == 'big':
-            first_small_flag = ''
-            im = load_image(f'{FIRST_PLAYER}_tank.png')
-            im = pygame.transform.scale(im, (80, 80))
+            self.a += 5
+            im = pygame.transform.scale(im, (self.a, self.a))
             self.image = im
             x, y = self.rect.x, self.rect.y
             self.rect = self.image.get_rect()
@@ -1186,143 +1176,167 @@ class First_tank(pygame.sprite.Sprite):
                 self.image = pygame.transform.rotate(self.image, 90)
             elif self.direction == 'right':
                 self.image = pygame.transform.rotate(self.image, 270)
-        if flag_finish:
-            image = load_image(f'{FIRST_PLAYER}_tank.png')
-            image = pygame.transform.scale(image, (80, 80))
-            self.image = image
+            if self.a == 80:
+                first_small_flag = ''
+                self.time_scale = 0
+                FIRST_SPEED = 1
+        elif first_small_flag == 'small' and self.a != 50 and pygame.time.get_ticks() - self.time_scale >= 100:
+            self.time_scale = pygame.time.get_ticks()
+            im = load_image(f'{FIRST_PLAYER}_tank.png')
+            self.a -= 5
+            im = pygame.transform.scale(im, (self.a, self.a))
+            self.image = im
+            x, y = self.rect.x, self.rect.y
             self.rect = self.image.get_rect()
-            self.rect.x, self.rect.y = 0, 810
-            self.direction = 'up'
-            self.timer = pygame.time
-            self.fire_time = 0
-            self.drive_flag = False
-        if action == 'drive':
-            if not self.drive_flag:
-                global first_drive_sound
-                if SOUNDS:
-                    first_drive_sound.play(-1)
-                    first_drive_sound.set_volume(0.3)
-                self.drive_flag = True
-        self.speedx = 0
-        self.speedy = 0
-        keystate = pygame.key.get_pressed()
-        if keystate[pygame.K_a]:
-            if not pygame.sprite.spritecollideany(self, left_st_wall):
-                self.speedx = -FIRST_SPEED
-                if self.direction == 'right':
-                    self.image = pygame.transform.rotate(self.image, 180)
-                elif self.direction == 'up':
-                    self.image = pygame.transform.rotate(self.image, 90)
-                elif self.direction == 'down':
-                    self.image = pygame.transform.rotate(self.image, 270)
-                self.direction = 'left'
-        if keystate[pygame.K_d]:
-            if not pygame.sprite.spritecollideany(self, right_st_wall):
-                self.speedx = FIRST_SPEED
-                if self.direction == 'left':
-                    self.image = pygame.transform.rotate(self.image, 180)
-                elif self.direction == 'up':
-                    self.image = pygame.transform.rotate(self.image, 270)
-                elif self.direction == 'down':
-                    self.image = pygame.transform.rotate(self.image, 90)
-                self.direction = 'right'
-        if keystate[pygame.K_w]:
-            if not pygame.sprite.spritecollideany(self, down_st_wall):
-                self.speedy = -FIRST_SPEED
-                if self.direction == 'down':
-                    self.image = pygame.transform.rotate(self.image, 180)
-                elif self.direction == 'left':
-                    self.image = pygame.transform.rotate(self.image, 270)
-                elif self.direction == 'right':
-                    self.image = pygame.transform.rotate(self.image, 90)
+            self.rect.x = x // 90 * 90 + 15
+            self.rect.y = y // 90 * 90 + 15
+            if self.direction == 'down':
+                self.image = pygame.transform.rotate(self.image, 180)
+            elif self.direction == 'left':
+                self.image = pygame.transform.rotate(self.image, 90)
+            elif self.direction == 'right':
+                self.image = pygame.transform.rotate(self.image, 270)
+            if self.a == 50:
+                first_small_flag = ''
+                self.time_scale = 0
+        else:
+            if flag_finish:
+                image = load_image(f'{FIRST_PLAYER}_tank.png')
+                image = pygame.transform.scale(image, (80, 80))
+                self.image = image
+                self.rect = self.image.get_rect()
+                self.rect.x, self.rect.y = 0, 810
                 self.direction = 'up'
-        if keystate[pygame.K_s]:
-            if not pygame.sprite.spritecollideany(self, up_st_wall):
-                self.speedy = FIRST_SPEED
-                if self.direction == 'up':
-                    self.image = pygame.transform.rotate(self.image, 180)
-                elif self.direction == 'left':
-                    self.image = pygame.transform.rotate(self.image, 90)
-                elif self.direction == 'right':
-                    self.image = pygame.transform.rotate(self.image, 270)
-                self.direction = 'down'
-        if action == 'fire':
-            if self.timer.get_ticks() - self.fire_time >= FIRST_TIME_RELOAD:
-                self.fire_time = self.timer.get_ticks()
-                bullet = Bullet(bullet_sprites)
-                all_sprites.add(bullet_sprites)
-                if SOUNDS:
-                    fire_sound = pygame.mixer.Sound('data/fire_sound.mp3')
-                    fire_sound.play()
-                    fire_sound.set_volume(0.4)
-                if self.direction == 'left':
-                    bullet.rect.x = self.rect.x + self.image.get_width() // 2 - 67
-                    bullet.rect.y = self.rect.y + self.image.get_height() // 2 - 5
-                    bullet.x1 = self.rect.x + self.image.get_width() // 2 - 67
-                    bullet.y1 = self.rect.y + self.image.get_height() // 2 - 5
-                    if bullet.direction == 'right':
-                        bullet.image = pygame.transform.rotate(bullet.image, 180)
-                    elif bullet.direction == 'up':
-                        bullet.image = pygame.transform.rotate(bullet.image, 90)
-                    elif bullet.direction == 'down':
-                        bullet.image = pygame.transform.rotate(bullet.image, 270)
-                    bullet.direction = 'left'
-                if self.direction == 'right':
-                    bullet.rect.x = self.rect.x + self.image.get_width() // 2 + 45
-                    bullet.rect.y = self.rect.y + self.image.get_height() // 2 - 7
-                    bullet.x1 = self.rect.x + self.image.get_width() // 2 + 45
-                    bullet.y1 = self.rect.y + self.image.get_height() // 2 - 7
-                    if bullet.direction == 'left':
-                        bullet.image = pygame.transform.rotate(bullet.image, 180)
-                    elif bullet.direction == 'up':
-                        bullet.image = pygame.transform.rotate(bullet.image, 270)
-                    elif bullet.direction == 'down':
-                        bullet.image = pygame.transform.rotate(bullet.image, 90)
-                    bullet.direction = 'right'
-                if self.direction == 'up':
-                    bullet.rect.x = self.rect.x + self.image.get_width() // 2 - 6
-                    bullet.rect.y = self.rect.y + self.image.get_height() // 2 - 78
-                    bullet.x1 = self.rect.x + self.image.get_width() // 2 - 6
-                    bullet.y1 = self.rect.y + self.image.get_height() // 2 - 78
-                    if bullet.direction == 'down':
-                        bullet.image = pygame.transform.rotate(bullet.image, 180)
-                    elif bullet.direction == 'left':
-                        bullet.image = pygame.transform.rotate(bullet.image, 270)
-                    elif bullet.direction == 'right':
-                        bullet.image = pygame.transform.rotate(bullet.image, 90)
-                    bullet.direction = 'up'
-                if self.direction == 'down':
-                    bullet.rect.x = self.rect.x + self.image.get_width() // 2 - 7
-                    bullet.rect.y = self.rect.y + self.image.get_height() // 2 + 45
-                    bullet.x1 = self.rect.x + self.image.get_width() // 2 - 7
-                    bullet.y1 = self.rect.y + self.image.get_height() // 2 + 45
-                    if bullet.direction == 'up':
-                        bullet.image = pygame.transform.rotate(bullet.image, 180)
-                    elif bullet.direction == 'left':
-                        bullet.image = pygame.transform.rotate(bullet.image, 90)
-                    elif bullet.direction == 'right':
-                        bullet.image = pygame.transform.rotate(bullet.image, 270)
-                    bullet.direction = 'down'
-                bullet.flag_move = True
-        self.rect.y += self.speedy
-        self.rect.x += self.speedx
-        if FIRST_SPEED == 3:
-            if pygame.sprite.spritecollideany(self, down_st_wall) and pygame.sprite.spritecollideany(self, left_st_wall) and pygame.sprite.spritecollideany(self, right_st_wall):
-                self.rect.y += 2
-            elif pygame.sprite.spritecollideany(self, up_st_wall) and pygame.sprite.spritecollideany(self, left_st_wall) and pygame.sprite.spritecollideany(self, right_st_wall):
-                self.rect.y -= 2
-            elif pygame.sprite.spritecollideany(self, down_st_wall) and pygame.sprite.spritecollideany(self, left_st_wall) and pygame.sprite.spritecollideany(self, up_st_wall):
-                self.rect.x -= 2
-            elif pygame.sprite.spritecollideany(self, down_st_wall) and pygame.sprite.spritecollideany(self, up_st_wall) and pygame.sprite.spritecollideany(self, right_st_wall):
-                self.rect.x += 2
-        if self.rect.right > 900:
-            self.rect.right = 900
-        if self.rect.left < 0:
-            self.rect.left = 0
-        if self.rect.top < 0:
-            self.rect.top = 0
-        if self.rect.bottom > 900:
-            self.rect.bottom = 900
+                self.timer = pygame.time
+                self.fire_time = 0
+                self.drive_flag = False
+            if action == 'drive':
+                if not self.drive_flag:
+                    global first_drive_sound
+                    if SOUNDS:
+                        first_drive_sound.play(-1)
+                        first_drive_sound.set_volume(0.3)
+                    self.drive_flag = True
+            self.speedx = 0
+            self.speedy = 0
+            keystate = pygame.key.get_pressed()
+            if keystate[pygame.K_a]:
+                if not pygame.sprite.spritecollideany(self, left_st_wall):
+                    self.speedx = -FIRST_SPEED
+                    if self.direction == 'right':
+                        self.image = pygame.transform.rotate(self.image, 180)
+                    elif self.direction == 'up':
+                        self.image = pygame.transform.rotate(self.image, 90)
+                    elif self.direction == 'down':
+                        self.image = pygame.transform.rotate(self.image, 270)
+                    self.direction = 'left'
+            if keystate[pygame.K_d]:
+                if not pygame.sprite.spritecollideany(self, right_st_wall):
+                    self.speedx = FIRST_SPEED
+                    if self.direction == 'left':
+                        self.image = pygame.transform.rotate(self.image, 180)
+                    elif self.direction == 'up':
+                        self.image = pygame.transform.rotate(self.image, 270)
+                    elif self.direction == 'down':
+                        self.image = pygame.transform.rotate(self.image, 90)
+                    self.direction = 'right'
+            if keystate[pygame.K_w]:
+                if not pygame.sprite.spritecollideany(self, down_st_wall):
+                    self.speedy = -FIRST_SPEED
+                    if self.direction == 'down':
+                        self.image = pygame.transform.rotate(self.image, 180)
+                    elif self.direction == 'left':
+                        self.image = pygame.transform.rotate(self.image, 270)
+                    elif self.direction == 'right':
+                        self.image = pygame.transform.rotate(self.image, 90)
+                    self.direction = 'up'
+            if keystate[pygame.K_s]:
+                if not pygame.sprite.spritecollideany(self, up_st_wall):
+                    self.speedy = FIRST_SPEED
+                    if self.direction == 'up':
+                        self.image = pygame.transform.rotate(self.image, 180)
+                    elif self.direction == 'left':
+                        self.image = pygame.transform.rotate(self.image, 90)
+                    elif self.direction == 'right':
+                        self.image = pygame.transform.rotate(self.image, 270)
+                    self.direction = 'down'
+            if action == 'fire':
+                if self.timer.get_ticks() - self.fire_time >= FIRST_TIME_RELOAD:
+                    self.fire_time = self.timer.get_ticks()
+                    bullet = Bullet(bullet_sprites)
+                    all_sprites.add(bullet_sprites)
+                    if SOUNDS:
+                        fire_sound = pygame.mixer.Sound('data/fire_sound.mp3')
+                        fire_sound.play()
+                        fire_sound.set_volume(0.4)
+                    if self.direction == 'left':
+                        bullet.rect.x = self.rect.x + self.image.get_width() // 2 - 67
+                        bullet.rect.y = self.rect.y + self.image.get_height() // 2 - 5
+                        bullet.x1 = self.rect.x + self.image.get_width() // 2 - 67
+                        bullet.y1 = self.rect.y + self.image.get_height() // 2 - 5
+                        if bullet.direction == 'right':
+                            bullet.image = pygame.transform.rotate(bullet.image, 180)
+                        elif bullet.direction == 'up':
+                            bullet.image = pygame.transform.rotate(bullet.image, 90)
+                        elif bullet.direction == 'down':
+                            bullet.image = pygame.transform.rotate(bullet.image, 270)
+                        bullet.direction = 'left'
+                    if self.direction == 'right':
+                        bullet.rect.x = self.rect.x + self.image.get_width() // 2 + 45
+                        bullet.rect.y = self.rect.y + self.image.get_height() // 2 - 7
+                        bullet.x1 = self.rect.x + self.image.get_width() // 2 + 45
+                        bullet.y1 = self.rect.y + self.image.get_height() // 2 - 7
+                        if bullet.direction == 'left':
+                            bullet.image = pygame.transform.rotate(bullet.image, 180)
+                        elif bullet.direction == 'up':
+                            bullet.image = pygame.transform.rotate(bullet.image, 270)
+                        elif bullet.direction == 'down':
+                            bullet.image = pygame.transform.rotate(bullet.image, 90)
+                        bullet.direction = 'right'
+                    if self.direction == 'up':
+                        bullet.rect.x = self.rect.x + self.image.get_width() // 2 - 6
+                        bullet.rect.y = self.rect.y + self.image.get_height() // 2 - 78
+                        bullet.x1 = self.rect.x + self.image.get_width() // 2 - 6
+                        bullet.y1 = self.rect.y + self.image.get_height() // 2 - 78
+                        if bullet.direction == 'down':
+                            bullet.image = pygame.transform.rotate(bullet.image, 180)
+                        elif bullet.direction == 'left':
+                            bullet.image = pygame.transform.rotate(bullet.image, 270)
+                        elif bullet.direction == 'right':
+                            bullet.image = pygame.transform.rotate(bullet.image, 90)
+                        bullet.direction = 'up'
+                    if self.direction == 'down':
+                        bullet.rect.x = self.rect.x + self.image.get_width() // 2 - 7
+                        bullet.rect.y = self.rect.y + self.image.get_height() // 2 + 45
+                        bullet.x1 = self.rect.x + self.image.get_width() // 2 - 7
+                        bullet.y1 = self.rect.y + self.image.get_height() // 2 + 45
+                        if bullet.direction == 'up':
+                            bullet.image = pygame.transform.rotate(bullet.image, 180)
+                        elif bullet.direction == 'left':
+                            bullet.image = pygame.transform.rotate(bullet.image, 90)
+                        elif bullet.direction == 'right':
+                            bullet.image = pygame.transform.rotate(bullet.image, 270)
+                        bullet.direction = 'down'
+                    bullet.flag_move = True
+            self.rect.y += self.speedy
+            self.rect.x += self.speedx
+            if FIRST_SPEED == 3:
+                if pygame.sprite.spritecollideany(self, down_st_wall) and pygame.sprite.spritecollideany(self, left_st_wall) and pygame.sprite.spritecollideany(self, right_st_wall):
+                    self.rect.y += 2
+                elif pygame.sprite.spritecollideany(self, up_st_wall) and pygame.sprite.spritecollideany(self, left_st_wall) and pygame.sprite.spritecollideany(self, right_st_wall):
+                    self.rect.y -= 2
+                elif pygame.sprite.spritecollideany(self, down_st_wall) and pygame.sprite.spritecollideany(self, left_st_wall) and pygame.sprite.spritecollideany(self, up_st_wall):
+                    self.rect.x -= 2
+                elif pygame.sprite.spritecollideany(self, down_st_wall) and pygame.sprite.spritecollideany(self, up_st_wall) and pygame.sprite.spritecollideany(self, right_st_wall):
+                    self.rect.x += 2
+            if self.rect.right > 900:
+                self.rect.right = 900
+            if self.rect.left < 0:
+                self.rect.left = 0
+            if self.rect.top < 0:
+                self.rect.top = 0
+            if self.rect.bottom > 900:
+                self.rect.bottom = 900
 
 
 class Second_tank(pygame.sprite.Sprite):
@@ -1340,30 +1354,19 @@ class Second_tank(pygame.sprite.Sprite):
         self.fire_time = 0
         self.drive_flag = False
         self.box_flag = False
+        self.a = 80
+        self.time_scale = 0
         global second_selff
         second_selff = self
 
     def update(self, action):
-        global second_small_flag, flag_finish
-        if second_small_flag == 'small':
-            second_small_flag = ''
+        global second_small_flag, flag_finish, SECOND_SPEED
+        if second_small_flag == 'big' and pygame.time.get_ticks() - self.time_scale >= 100:
+            SECOND_SPEED = 0
+            self.time_scale = pygame.time.get_ticks()
             im = load_image(f'{SECOND_PLAYER}_tank.png')
-            im = pygame.transform.scale(im, (50, 50))
-            self.image = im
-            x, y = self.rect.x, self.rect.y
-            self.rect = self.image.get_rect()
-            self.rect.x = x + 20
-            self.rect.y = y + 20
-            if self.direction == 'down':
-                self.image = pygame.transform.rotate(self.image, 180)
-            elif self.direction == 'left':
-                self.image = pygame.transform.rotate(self.image, 90)
-            elif self.direction == 'right':
-                self.image = pygame.transform.rotate(self.image, 270)
-        elif second_small_flag == 'big':
-            second_small_flag = ''
-            im = load_image(f'{SECOND_PLAYER}_tank.png')
-            im = pygame.transform.scale(im, (80, 80))
+            self.a += 5
+            im = pygame.transform.scale(im, (self.a, self.a))
             self.image = im
             x, y = self.rect.x, self.rect.y
             self.rect = self.image.get_rect()
@@ -1375,144 +1378,168 @@ class Second_tank(pygame.sprite.Sprite):
                 self.image = pygame.transform.rotate(self.image, 90)
             elif self.direction == 'right':
                 self.image = pygame.transform.rotate(self.image, 270)
-        if flag_finish:
-            image = load_image(f'{SECOND_PLAYER}_tank.png')
-            image = pygame.transform.scale(image, (80, 80))
-            image = pygame.transform.rotate(image, 180)
-            self.image = image
+            if self.a == 80:
+                second_small_flag = ''
+                self.time_scale = 0
+                SECOND_SPEED = 1
+        elif second_small_flag == 'small' and self.a != 50 and pygame.time.get_ticks() - self.time_scale >= 100:
+            self.time_scale = pygame.time.get_ticks()
+            im = load_image(f'{SECOND_PLAYER}_tank.png')
+            self.a -= 5
+            im = pygame.transform.scale(im, (self.a, self.a))
+            self.image = im
+            x, y = self.rect.x, self.rect.y
             self.rect = self.image.get_rect()
-            self.rect.x, self.rect.y = 810, 0
-            self.direction = 'down'
-            self.timer = pygame.time
-            self.fire_time = 0
-            self.drive_flag = False
-        if action == 'drive':
-            if not self.drive_flag:
-                global second_drive_sound
-                if SOUNDS:
-                    second_drive_sound.play(-1)
-                    second_drive_sound.set_volume(0.3)
-                self.drive_flag = True
-        self.speedx = 0
-        self.speedy = 0
-        keystate = pygame.key.get_pressed()
-        if keystate[pygame.K_LEFT]:
-            if not pygame.sprite.spritecollideany(self, left_st_wall):
-                self.speedx = -SECOND_SPEED
-                if self.direction == 'right':
-                    self.image = pygame.transform.rotate(self.image, 180)
-                elif self.direction == 'up':
-                    self.image = pygame.transform.rotate(self.image, 90)
-                elif self.direction == 'down':
-                    self.image = pygame.transform.rotate(self.image, 270)
-                self.direction = 'left'
-        if keystate[pygame.K_RIGHT]:
-            if not pygame.sprite.spritecollideany(self, right_st_wall):
-                self.speedx = SECOND_SPEED
-                if self.direction == 'left':
-                    self.image = pygame.transform.rotate(self.image, 180)
-                elif self.direction == 'up':
-                    self.image = pygame.transform.rotate(self.image, 270)
-                elif self.direction == 'down':
-                    self.image = pygame.transform.rotate(self.image, 90)
-                self.direction = 'right'
-        if keystate[pygame.K_UP]:
-            if not pygame.sprite.spritecollideany(self, down_st_wall):
-                self.speedy = -SECOND_SPEED
-                if self.direction == 'down':
-                    self.image = pygame.transform.rotate(self.image, 180)
-                elif self.direction == 'left':
-                    self.image = pygame.transform.rotate(self.image, 270)
-                elif self.direction == 'right':
-                    self.image = pygame.transform.rotate(self.image, 90)
-                self.direction = 'up'
-        if keystate[pygame.K_DOWN]:
-            if not pygame.sprite.spritecollideany(self, up_st_wall):
-                self.speedy = SECOND_SPEED
-                if self.direction == 'up':
-                    self.image = pygame.transform.rotate(self.image, 180)
-                elif self.direction == 'left':
-                    self.image = pygame.transform.rotate(self.image, 90)
-                elif self.direction == 'right':
-                    self.image = pygame.transform.rotate(self.image, 270)
+            self.rect.x = x // 90 * 90 + 15
+            self.rect.y = y // 90 * 90 + 15
+            if self.direction == 'down':
+                self.image = pygame.transform.rotate(self.image, 180)
+            elif self.direction == 'left':
+                self.image = pygame.transform.rotate(self.image, 90)
+            elif self.direction == 'right':
+                self.image = pygame.transform.rotate(self.image, 270)
+            if self.a == 50:
+                second_small_flag = ''
+                self.time_scale = 0
+        else:
+            if flag_finish:
+                image = load_image(f'{SECOND_PLAYER}_tank.png')
+                image = pygame.transform.scale(image, (80, 80))
+                image = pygame.transform.rotate(image, 180)
+                self.image = image
+                self.rect = self.image.get_rect()
+                self.rect.x, self.rect.y = 810, 0
                 self.direction = 'down'
-        if action == 'fire':
-            if self.timer.get_ticks() - self.fire_time >= SECOND_TIME_RELOAD:
-                self.fire_time = self.timer.get_ticks()
-                bullet = Bullet(bullet_sprites)
-                all_sprites.add(bullet_sprites)
-                if SOUNDS:
-                    fire_sound = pygame.mixer.Sound('data/fire_sound.mp3')
-                    fire_sound.play()
-                    fire_sound.set_volume(0.4)
-                if self.direction == 'left':
-                    bullet.rect.x = self.rect.x + self.image.get_width() // 2 - 67
-                    bullet.rect.y = self.rect.y + self.image.get_height() // 2 - 5
-                    bullet.x1 = self.rect.x + self.image.get_width() // 2 - 67
-                    bullet.y1 = self.rect.y + self.image.get_height() // 2 - 5
-                    if bullet.direction == 'right':
-                        bullet.image = pygame.transform.rotate(bullet.image, 180)
-                    elif bullet.direction == 'up':
-                        bullet.image = pygame.transform.rotate(bullet.image, 90)
-                    elif bullet.direction == 'down':
-                        bullet.image = pygame.transform.rotate(bullet.image, 270)
-                    bullet.direction = 'left'
-                if self.direction == 'right':
-                    bullet.rect.x = self.rect.x + self.image.get_width() // 2 + 45
-                    bullet.rect.y = self.rect.y + self.image.get_height() // 2 - 7
-                    bullet.x1 = self.rect.x + self.image.get_width() // 2 + 45
-                    bullet.y1 = self.rect.y + self.image.get_height() // 2 - 7
-                    if bullet.direction == 'left':
-                        bullet.image = pygame.transform.rotate(bullet.image, 180)
-                    elif bullet.direction == 'up':
-                        bullet.image = pygame.transform.rotate(bullet.image, 270)
-                    elif bullet.direction == 'down':
-                        bullet.image = pygame.transform.rotate(bullet.image, 90)
-                    bullet.direction = 'right'
-                if self.direction == 'up':
-                    bullet.rect.x = self.rect.x + self.image.get_width() // 2 - 6
-                    bullet.rect.y = self.rect.y + self.image.get_height() // 2 - 78
-                    bullet.x1 = self.rect.x + self.image.get_width() // 2 - 6
-                    bullet.y1 = self.rect.y + self.image.get_height() // 2 - 78
-                    if bullet.direction == 'down':
-                        bullet.image = pygame.transform.rotate(bullet.image, 180)
-                    elif bullet.direction == 'left':
-                        bullet.image = pygame.transform.rotate(bullet.image, 270)
-                    elif bullet.direction == 'right':
-                        bullet.image = pygame.transform.rotate(bullet.image, 90)
-                    bullet.direction = 'up'
-                if self.direction == 'down':
-                    bullet.rect.x = self.rect.x + self.image.get_width() // 2 - 7
-                    bullet.rect.y = self.rect.y + self.image.get_height() // 2 + 45
-                    bullet.x1 = self.rect.x + self.image.get_width() // 2 - 7
-                    bullet.y1 = self.rect.y + self.image.get_height() // 2 + 45
-                    if bullet.direction == 'up':
-                        bullet.image = pygame.transform.rotate(bullet.image, 180)
-                    elif bullet.direction == 'left':
-                        bullet.image = pygame.transform.rotate(bullet.image, 90)
-                    elif bullet.direction == 'right':
-                        bullet.image = pygame.transform.rotate(bullet.image, 270)
-                    bullet.direction = 'down'
-                bullet.flag_move = True
-        self.rect.y += self.speedy
-        self.rect.x += self.speedx
-        if SECOND_SPEED == 3:
-            if pygame.sprite.spritecollideany(self, down_st_wall) and pygame.sprite.spritecollideany(self, left_st_wall) and pygame.sprite.spritecollideany(self, right_st_wall):
-                self.rect.y += 2
-            elif pygame.sprite.spritecollideany(self, up_st_wall) and pygame.sprite.spritecollideany(self, left_st_wall) and pygame.sprite.spritecollideany(self, right_st_wall):
-                self.rect.y -= 2
-            elif pygame.sprite.spritecollideany(self, down_st_wall) and pygame.sprite.spritecollideany(self, left_st_wall) and pygame.sprite.spritecollideany(self, up_st_wall):
-                self.rect.x -= 2
-            elif pygame.sprite.spritecollideany(self, down_st_wall) and pygame.sprite.spritecollideany(self, up_st_wall) and pygame.sprite.spritecollideany(self, right_st_wall):
-                self.rect.x += 2
-        if self.rect.right > 900:
-            self.rect.right = 900
-        if self.rect.left < 0:
-            self.rect.left = 0
-        if self.rect.top < 0:
-            self.rect.top = 0
-        if self.rect.bottom > 900:
-            self.rect.bottom = 900
+                self.timer = pygame.time
+                self.fire_time = 0
+                self.drive_flag = False
+            if action == 'drive':
+                if not self.drive_flag:
+                    global second_drive_sound
+                    if SOUNDS:
+                        second_drive_sound.play(-1)
+                        second_drive_sound.set_volume(0.3)
+                    self.drive_flag = True
+            self.speedx = 0
+            self.speedy = 0
+            keystate = pygame.key.get_pressed()
+            if keystate[pygame.K_LEFT]:
+                if not pygame.sprite.spritecollideany(self, left_st_wall):
+                    self.speedx = -SECOND_SPEED
+                    if self.direction == 'right':
+                        self.image = pygame.transform.rotate(self.image, 180)
+                    elif self.direction == 'up':
+                        self.image = pygame.transform.rotate(self.image, 90)
+                    elif self.direction == 'down':
+                        self.image = pygame.transform.rotate(self.image, 270)
+                    self.direction = 'left'
+            if keystate[pygame.K_RIGHT]:
+                if not pygame.sprite.spritecollideany(self, right_st_wall):
+                    self.speedx = SECOND_SPEED
+                    if self.direction == 'left':
+                        self.image = pygame.transform.rotate(self.image, 180)
+                    elif self.direction == 'up':
+                        self.image = pygame.transform.rotate(self.image, 270)
+                    elif self.direction == 'down':
+                        self.image = pygame.transform.rotate(self.image, 90)
+                    self.direction = 'right'
+            if keystate[pygame.K_UP]:
+                if not pygame.sprite.spritecollideany(self, down_st_wall):
+                    self.speedy = -SECOND_SPEED
+                    if self.direction == 'down':
+                        self.image = pygame.transform.rotate(self.image, 180)
+                    elif self.direction == 'left':
+                        self.image = pygame.transform.rotate(self.image, 270)
+                    elif self.direction == 'right':
+                        self.image = pygame.transform.rotate(self.image, 90)
+                    self.direction = 'up'
+            if keystate[pygame.K_DOWN]:
+                if not pygame.sprite.spritecollideany(self, up_st_wall):
+                    self.speedy = SECOND_SPEED
+                    if self.direction == 'up':
+                        self.image = pygame.transform.rotate(self.image, 180)
+                    elif self.direction == 'left':
+                        self.image = pygame.transform.rotate(self.image, 90)
+                    elif self.direction == 'right':
+                        self.image = pygame.transform.rotate(self.image, 270)
+                    self.direction = 'down'
+            if action == 'fire':
+                if self.timer.get_ticks() - self.fire_time >= SECOND_TIME_RELOAD:
+                    self.fire_time = self.timer.get_ticks()
+                    bullet = Bullet(bullet_sprites)
+                    all_sprites.add(bullet_sprites)
+                    if SOUNDS:
+                        fire_sound = pygame.mixer.Sound('data/fire_sound.mp3')
+                        fire_sound.play()
+                        fire_sound.set_volume(0.4)
+                    if self.direction == 'left':
+                        bullet.rect.x = self.rect.x + self.image.get_width() // 2 - 67
+                        bullet.rect.y = self.rect.y + self.image.get_height() // 2 - 5
+                        bullet.x1 = self.rect.x + self.image.get_width() // 2 - 67
+                        bullet.y1 = self.rect.y + self.image.get_height() // 2 - 5
+                        if bullet.direction == 'right':
+                            bullet.image = pygame.transform.rotate(bullet.image, 180)
+                        elif bullet.direction == 'up':
+                            bullet.image = pygame.transform.rotate(bullet.image, 90)
+                        elif bullet.direction == 'down':
+                            bullet.image = pygame.transform.rotate(bullet.image, 270)
+                        bullet.direction = 'left'
+                    if self.direction == 'right':
+                        bullet.rect.x = self.rect.x + self.image.get_width() // 2 + 45
+                        bullet.rect.y = self.rect.y + self.image.get_height() // 2 - 7
+                        bullet.x1 = self.rect.x + self.image.get_width() // 2 + 45
+                        bullet.y1 = self.rect.y + self.image.get_height() // 2 - 7
+                        if bullet.direction == 'left':
+                            bullet.image = pygame.transform.rotate(bullet.image, 180)
+                        elif bullet.direction == 'up':
+                            bullet.image = pygame.transform.rotate(bullet.image, 270)
+                        elif bullet.direction == 'down':
+                            bullet.image = pygame.transform.rotate(bullet.image, 90)
+                        bullet.direction = 'right'
+                    if self.direction == 'up':
+                        bullet.rect.x = self.rect.x + self.image.get_width() // 2 - 6
+                        bullet.rect.y = self.rect.y + self.image.get_height() // 2 - 78
+                        bullet.x1 = self.rect.x + self.image.get_width() // 2 - 6
+                        bullet.y1 = self.rect.y + self.image.get_height() // 2 - 78
+                        if bullet.direction == 'down':
+                            bullet.image = pygame.transform.rotate(bullet.image, 180)
+                        elif bullet.direction == 'left':
+                            bullet.image = pygame.transform.rotate(bullet.image, 270)
+                        elif bullet.direction == 'right':
+                            bullet.image = pygame.transform.rotate(bullet.image, 90)
+                        bullet.direction = 'up'
+                    if self.direction == 'down':
+                        bullet.rect.x = self.rect.x + self.image.get_width() // 2 - 7
+                        bullet.rect.y = self.rect.y + self.image.get_height() // 2 + 45
+                        bullet.x1 = self.rect.x + self.image.get_width() // 2 - 7
+                        bullet.y1 = self.rect.y + self.image.get_height() // 2 + 45
+                        if bullet.direction == 'up':
+                            bullet.image = pygame.transform.rotate(bullet.image, 180)
+                        elif bullet.direction == 'left':
+                            bullet.image = pygame.transform.rotate(bullet.image, 90)
+                        elif bullet.direction == 'right':
+                            bullet.image = pygame.transform.rotate(bullet.image, 270)
+                        bullet.direction = 'down'
+                    bullet.flag_move = True
+            self.rect.y += self.speedy
+            self.rect.x += self.speedx
+            if SECOND_SPEED == 3:
+                if pygame.sprite.spritecollideany(self, down_st_wall) and pygame.sprite.spritecollideany(self, left_st_wall) and pygame.sprite.spritecollideany(self, right_st_wall):
+                    self.rect.y += 2
+                elif pygame.sprite.spritecollideany(self, up_st_wall) and pygame.sprite.spritecollideany(self, left_st_wall) and pygame.sprite.spritecollideany(self, right_st_wall):
+                    self.rect.y -= 2
+                elif pygame.sprite.spritecollideany(self, down_st_wall) and pygame.sprite.spritecollideany(self, left_st_wall) and pygame.sprite.spritecollideany(self, up_st_wall):
+                    self.rect.x -= 2
+                elif pygame.sprite.spritecollideany(self, down_st_wall) and pygame.sprite.spritecollideany(self, up_st_wall) and pygame.sprite.spritecollideany(self, right_st_wall):
+                    self.rect.x += 2
+            if self.rect.right > 900:
+                self.rect.right = 900
+            if self.rect.left < 0:
+                self.rect.left = 0
+            if self.rect.top < 0:
+                self.rect.top = 0
+            if self.rect.bottom > 900:
+                self.rect.bottom = 900
 
 
 def fight_screen_update():
@@ -1552,8 +1579,8 @@ def main():
     running = True
     while running:
         clock.tick(FPS)
-        if pygame.time.get_ticks() - time >= 15000:
-            box = random.choice(['Small_Box', 'Bullet_Box', 'Med_Box', 'Fast_Box'])
+        if pygame.time.get_ticks() - time >= 7000:
+            box = random.choice(['Small_Box'])
             if box == 'Med_Box':
                 Med_Box()
                 all_sprites.add(med_box_sprites)
