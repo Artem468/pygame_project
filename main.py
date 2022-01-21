@@ -1725,6 +1725,7 @@ def main():
             all_sprites.draw(screen)
             first_sprites.draw(screen)
             second_sprites.draw(screen)
+            bullet_sprites.draw(screen)
             print_health()
         pygame.display.flip()
     terminate()
