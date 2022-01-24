@@ -80,6 +80,7 @@ tile_images3 = {
     'empty': load_image('snow.png')
 }
 tile_width = tile_height = 90
+pygame.display.set_icon(load_image('icon.png'))
 
 
 class ScreenFrame(pygame.sprite.Sprite):
@@ -661,7 +662,7 @@ def settings():
 
 
 def description():
-    color = pygame.Surface((430, 430))
+    color = pygame.Surface((500, 575))
     color.set_alpha(220)
     color.fill((0, 0, 0))
     screen.blit(color, (0, 50))
@@ -670,52 +671,69 @@ def description():
     small_box = pygame.transform.scale(load_image('small_box.jpg'), (60, 60))
     bullet_box = pygame.transform.scale(load_image('bullet_box.jpg'), (60, 60))
     fast_box = pygame.transform.scale(load_image('fast_box.jpg'), (60, 60))
+    wasd = pygame.transform.scale(load_image('wasd.png'), (150, 90))
+    arrows = pygame.transform.scale(load_image('arrows.png'), (150, 90))
+    shift = pygame.transform.scale(load_image('shift.png'), (118, 50))
     font = pygame.font.Font(None, 21)
     font2 = pygame.font.Font(None, 25)
+    font3 = pygame.font.Font(None, 120)
 
-    screen.blit(med_box, (50, 80))
+    screen.blit(med_box, (100, 80))
     text = font2.render('Аптечка', True, pygame.Color('white'))
-    screen.blit(text, (50, 150))
+    screen.blit(text, (100, 150))
     text = font.render('Подобрав этот бонус,', True, pygame.Color('white'))
-    screen.blit(text, (20, 180))
+    screen.blit(text, (70, 180))
     text = font.render('здоровье Вашего танка', True, pygame.Color('white'))
-    screen.blit(text, (15, 195))
+    screen.blit(text, (65, 195))
     text = font.render('увеличится на 50 единиц!', True, pygame.Color('white'))
-    screen.blit(text, (10, 210))
+    screen.blit(text, (60, 210))
 
-    screen.blit(fast_box, (280, 80))
+    screen.blit(fast_box, (330, 80))
     text = font2.render('Ускорение', True, pygame.Color('white'))
-    screen.blit(text, (265, 150))
+    screen.blit(text, (315, 150))
     text = font.render('Эта суперспособность', True, pygame.Color('white'))
-    screen.blit(text, (235, 180))
+    screen.blit(text, (285, 180))
     text = font.render('добавляет скорость', True, pygame.Color('white'))
-    screen.blit(text, (240, 195))
+    screen.blit(text, (290, 195))
     text = font.render('Вашему танку на 10 сек.', True, pygame.Color('white'))
-    screen.blit(text, (230, 210))
+    screen.blit(text, (280, 210))
 
-    screen.blit(bullet_box, (50, 260))
+    screen.blit(bullet_box, (100, 260))
     text = font2.render('Скорострельность', True, pygame.Color('white'))
-    screen.blit(text, (10, 340))
+    screen.blit(text, (60, 340))
     text = font.render('С помощью этого', True, pygame.Color('white'))
-    screen.blit(text, (25, 370))
+    screen.blit(text, (75, 370))
     text = font.render('улучшения, скорость', True, pygame.Color('white'))
-    screen.blit(text, (15, 385))
+    screen.blit(text, (65, 385))
     text = font.render('перезарядки у Вашего', True, pygame.Color('white'))
-    screen.blit(text, (10, 400))
+    screen.blit(text, (60, 400))
     text = font.render('танка станет равна 0', True, pygame.Color('white'))
-    screen.blit(text, (15, 415))
+    screen.blit(text, (65, 415))
     text = font.render('на 10 секунд!', True, pygame.Color('white'))
-    screen.blit(text, (30, 430))
+    screen.blit(text, (80, 430))
 
-    screen.blit(small_box, (280, 260))
+    screen.blit(small_box, (330, 260))
     text = font2.render('Уменьшение', True, pygame.Color('white'))
-    screen.blit(text, (260, 340))
+    screen.blit(text, (310, 340))
     text = font.render('Данная суперспособность', True, pygame.Color('white'))
-    screen.blit(text, (225, 370))
+    screen.blit(text, (275, 370))
     text = font.render('уменьшает Ваш танк', True, pygame.Color('white'))
-    screen.blit(text, (240, 385))
+    screen.blit(text, (290, 385))
     text = font.render('почти в 2 раза на 10 сек.', True, pygame.Color('white'))
-    screen.blit(text, (230, 400))
+    screen.blit(text, (280, 400))
+
+    screen.blit(wasd, (30, 460))
+    text = font3.render('/', True, pygame.Color('white'))
+    screen.blit(text, (200, 470))
+    screen.blit(arrows, (235, 460))
+    text = font2.render('- движение', True, pygame.Color('white'))
+    screen.blit(text, (390, 490))
+    text = font2.render('танка', True, pygame.Color('white'))
+    screen.blit(text, (420, 505))
+
+    screen.blit(shift, (120, 570))
+    text = font2.render('- стрельба танка', True, pygame.Color('white'))
+    screen.blit(text, (250, 585))
 
 
 med_box_sprites = pygame.sprite.Group()
@@ -1371,14 +1389,14 @@ class First_tank(pygame.sprite.Sprite):
             self.rect.y += self.speedy
             self.rect.x += self.speedx
             if FIRST_SPEED == 3:
-                if pygame.sprite.spritecollideany(self, down_st_wall) and pygame.sprite.spritecollideany(self, left_st_wall) and pygame.sprite.spritecollideany(self, right_st_wall):
-                    self.rect.y += 2
-                elif pygame.sprite.spritecollideany(self, up_st_wall) and pygame.sprite.spritecollideany(self, left_st_wall) and pygame.sprite.spritecollideany(self, right_st_wall):
-                    self.rect.y -= 2
-                elif pygame.sprite.spritecollideany(self, down_st_wall) and pygame.sprite.spritecollideany(self, left_st_wall) and pygame.sprite.spritecollideany(self, up_st_wall):
-                    self.rect.x -= 2
-                elif pygame.sprite.spritecollideany(self, down_st_wall) and pygame.sprite.spritecollideany(self, up_st_wall) and pygame.sprite.spritecollideany(self, right_st_wall):
+                if pygame.sprite.spritecollideany(self, left_st_wall):
                     self.rect.x += 2
+                if pygame.sprite.spritecollideany(self, right_st_wall):
+                    self.rect.x -= 2
+                if pygame.sprite.spritecollideany(self, down_st_wall):
+                    self.rect.y += 2
+                if pygame.sprite.spritecollideany(self, up_st_wall):
+                    self.rect.y -= 2
             if self.rect.right > 900:
                 self.rect.right = 900
             if self.rect.left < 0:
@@ -1586,14 +1604,14 @@ class Second_tank(pygame.sprite.Sprite):
             self.rect.y += self.speedy
             self.rect.x += self.speedx
             if SECOND_SPEED == 3:
-                if pygame.sprite.spritecollideany(self, down_st_wall) and pygame.sprite.spritecollideany(self, left_st_wall) and pygame.sprite.spritecollideany(self, right_st_wall):
-                    self.rect.y += 2
-                elif pygame.sprite.spritecollideany(self, up_st_wall) and pygame.sprite.spritecollideany(self, left_st_wall) and pygame.sprite.spritecollideany(self, right_st_wall):
-                    self.rect.y -= 2
-                elif pygame.sprite.spritecollideany(self, down_st_wall) and pygame.sprite.spritecollideany(self, left_st_wall) and pygame.sprite.spritecollideany(self, up_st_wall):
-                    self.rect.x -= 2
-                elif pygame.sprite.spritecollideany(self, down_st_wall) and pygame.sprite.spritecollideany(self, up_st_wall) and pygame.sprite.spritecollideany(self, right_st_wall):
+                if pygame.sprite.spritecollideany(self, left_st_wall):
                     self.rect.x += 2
+                if pygame.sprite.spritecollideany(self, right_st_wall):
+                    self.rect.x -= 2
+                if pygame.sprite.spritecollideany(self, down_st_wall):
+                    self.rect.y += 2
+                if pygame.sprite.spritecollideany(self, up_st_wall):
+                    self.rect.y -= 2
             if self.rect.right > 900:
                 self.rect.right = 900
             if self.rect.left < 0:
@@ -1643,7 +1661,7 @@ def main():
         pygame.mouse.set_visible(False)
         clock.tick(FPS)
         if pygame.time.get_ticks() - time >= 15000:
-            box = random.choice(['Small_Box', 'Bullet_Box', 'Med_Box', 'Fast_Box'])
+            box = random.choice(['Fast_Box'])
             if box == 'Med_Box':
                 Med_Box()
                 all_sprites.add(med_box_sprites)
