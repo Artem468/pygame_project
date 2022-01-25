@@ -887,6 +887,7 @@ class Small_Box(pygame.sprite.Sprite):
         self.rect.x, self.rect.y = -100, -100
         self.time = 0
         self.player = ''
+        self.flag = True
         while flag:
             x = random.randint(0, 9)
             y = random.randint(0, 9)
@@ -918,16 +919,19 @@ class Small_Box(pygame.sprite.Sprite):
                 second_selff.box_flag = True
         if self.time != 0:
             if pygame.time.get_ticks() - self.time >= 10000:
-                if self.player == 'first':
-                    if first_selff.a != 80:
-                        first_selff.box_flag = False
-                        first_small_flag = 'big'
-                        self.time = 0
-                elif self.player == 'second':
-                    if second_selff.a != 80:
-                        second_selff.box_flag = False
-                        second_small_flag = 'big'
-                        self.time = 0
+                if first_small_flag == False or second_small_flag == False:
+                    self.flag = False
+                if self.flag:
+                    if self.player == 'first':
+                        if first_selff.a != 80:
+                            first_selff.box_flag = False
+                            first_small_flag = 'big'
+                            self.time = 0
+                    elif self.player == 'second':
+                        if second_selff.a != 80:
+                            second_selff.box_flag = False
+                            second_small_flag = 'big'
+                            self.time = 0
 
 
 class Bullet_Box(pygame.sprite.Sprite):
@@ -1271,10 +1275,11 @@ class First_tank(pygame.sprite.Sprite):
             elif self.direction == 'right':
                 self.image = pygame.transform.rotate(self.image, 270)
             if self.a == 80:
-                first_small_flag = ''
+                first_small_flag = False
                 self.time_scale = 0
                 FIRST_SPEED = 1
                 self.flag = True
+                self.box_flag = False
         elif first_small_flag == 'small' and pygame.time.get_ticks() - self.time_scale >= 100:
             if self.a != 50:
                 FIRST_SPEED = 0
@@ -1297,6 +1302,7 @@ class First_tank(pygame.sprite.Sprite):
                 if first_tp_flag:
                     first_portal_self.rect.x, first_portal_self.rect.y = -100, -100
                     while self.flag:
+                        print('ok')
                         x = random.randint(0, 9)
                         y = random.randint(0, 9)
                         gg = f'{x} {y}'
@@ -1736,14 +1742,15 @@ def main():
     second_pushed_buttons = 0
     running = True
     while running:
+        print(first_small_flag, second_small_flag)
         pygame.mouse.set_visible(False)
         clock.tick(FPS)
-        if pygame.time.get_ticks() - time_portal >= 10000:
+        if pygame.time.get_ticks() - time_portal >= 30000:
             Portal()
             all_sprites.add(portal_sprites)
             time_portal = pygame.time.get_ticks()
         if pygame.time.get_ticks() - time_box >= 15000:
-            box = random.choice(['Small_Box'])
+            box = random.choice(['Fast_Box', 'Med_Box', 'Bullet_Box', 'Small_Box'])
             if box == 'Med_Box':
                 Med_Box()
                 all_sprites.add(med_box_sprites)
