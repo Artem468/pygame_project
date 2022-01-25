@@ -28,6 +28,10 @@ first_small_flag = False
 second_small_flag = False
 flag_finish = ''
 flag_tanks = False
+first_tp_flag = False
+second_tp_flag = False
+first_portal_self = ''
+second_portal_self = ''
 FPS = 60
 FIRST_TIME_RELOAD = 1500
 SECOND_TIME_RELOAD = 1500
@@ -740,6 +744,43 @@ med_box_sprites = pygame.sprite.Group()
 fast_box_sprites = pygame.sprite.Group()
 small_box_sprites = pygame.sprite.Group()
 bullet_box_sprites = pygame.sprite.Group()
+portal_sprites = pygame.sprite.Group()
+
+
+class Portal(pygame.sprite.Sprite):
+    image = load_image('portal.png')
+    image = pygame.transform.scale(image, (90, 90))
+
+    def __init__(self):
+        super(Portal, self).__init__(portal_sprites)
+        self.image = Portal.image
+        flag = True
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = -100, -100
+        self.time = pygame.time.get_ticks()
+        while flag:
+            x = random.randint(0, 9)
+            y = random.randint(0, 9)
+            gg = f'{x} {y}'
+            if gg not in spisok_wall:
+                flag = False
+                self.rect.x = x * 90
+                self.rect.y = y * 90
+
+    def update(self):
+        global first_small_flag, second_small_flag, first_tp_flag, second_tp_flag, first_portal_self, second_portal_self
+        if pygame.time.get_ticks() - self.time >= 15000:
+            self.rect.x, self.rect.y = -100, -100
+        if pygame.sprite.spritecollideany(self, first_sprites):
+            first_small_flag = 'small'
+            self.rect.x, self.rect.y = -100, -100
+            first_tp_flag = True
+            first_portal_self = self
+        elif pygame.sprite.spritecollideany(self, second_sprites):
+            second_small_flag = 'small'
+            self.rect.x, self.rect.y = -100, -100
+            second_tp_flag = True
+            second_portal_self = self
 
 
 class Med_Box(pygame.sprite.Sprite):
@@ -984,19 +1025,15 @@ class Bullet(pygame.sprite.Sprite):
             global running, flag_finish
             if self.player == 'first':
                 if pygame.sprite.spritecollideany(first_selff, right_st_wall) and self.direction == 'right':
-                    print('left')
                     bullet_change_im(self)
                     self.rect.move_ip(-15, -5)
                 elif pygame.sprite.spritecollideany(first_selff, left_st_wall) and self.direction == 'left':
-                    print('right')
                     bullet_change_im(self)
                     self.rect.move_ip(0, -10)
                 elif pygame.sprite.spritecollideany(first_selff, up_st_wall) and self.direction == 'down':
-                    print('up')
                     bullet_change_im(self)
                     self.rect.move_ip(-3, -25)
                 elif pygame.sprite.spritecollideany(first_selff, down_st_wall) and self.direction == 'up':
-                    print('down')
                     bullet_change_im(self)
                     self.rect.move_ip(-5, 18)
             elif self.player == 'second':
@@ -1210,11 +1247,12 @@ class First_tank(pygame.sprite.Sprite):
         self.box_flag = False
         self.a = 80
         self.time_scale = 0
+        self.flag = True
         global first_selff
         first_selff = self
 
     def update(self, action):
-        global first_small_flag, flag_finish, FIRST_SPEED
+        global first_small_flag, flag_finish, FIRST_SPEED, spisok_walls, first_tp_flag
         if first_small_flag == 'big' and pygame.time.get_ticks() - self.time_scale >= 100:
             FIRST_SPEED = 0
             self.time_scale = pygame.time.get_ticks()
@@ -1236,25 +1274,43 @@ class First_tank(pygame.sprite.Sprite):
                 first_small_flag = ''
                 self.time_scale = 0
                 FIRST_SPEED = 1
-        elif first_small_flag == 'small' and self.a != 50 and pygame.time.get_ticks() - self.time_scale >= 100:
-            self.time_scale = pygame.time.get_ticks()
-            im = load_image(f'{FIRST_PLAYER}_tank.png')
-            self.a -= 5
-            im = pygame.transform.scale(im, (self.a, self.a))
-            self.image = im
-            x, y = self.rect.x, self.rect.y
-            self.rect = self.image.get_rect()
-            self.rect.x = x // 90 * 90 + 15
-            self.rect.y = y // 90 * 90 + 15
-            if self.direction == 'down':
-                self.image = pygame.transform.rotate(self.image, 180)
-            elif self.direction == 'left':
-                self.image = pygame.transform.rotate(self.image, 90)
-            elif self.direction == 'right':
-                self.image = pygame.transform.rotate(self.image, 270)
+                self.flag = True
+        elif first_small_flag == 'small' and pygame.time.get_ticks() - self.time_scale >= 100:
+            if self.a != 50:
+                FIRST_SPEED = 0
+                self.time_scale = pygame.time.get_ticks()
+                im = load_image(f'{FIRST_PLAYER}_tank.png')
+                self.a -= 5
+                im = pygame.transform.scale(im, (self.a, self.a))
+                self.image = im
+                x, y = self.rect.x, self.rect.y
+                self.rect = self.image.get_rect()
+                self.rect.x = x // 90 * 90 + 15
+                self.rect.y = y // 90 * 90 + 15
+                if self.direction == 'down':
+                    self.image = pygame.transform.rotate(self.image, 180)
+                elif self.direction == 'left':
+                    self.image = pygame.transform.rotate(self.image, 90)
+                elif self.direction == 'right':
+                    self.image = pygame.transform.rotate(self.image, 270)
             if self.a == 50:
-                first_small_flag = ''
-                self.time_scale = 0
+                if first_tp_flag:
+                    first_portal_self.rect.x, first_portal_self.rect.y = -100, -100
+                    while self.flag:
+                        x = random.randint(0, 9)
+                        y = random.randint(0, 9)
+                        gg = f'{x} {y}'
+                        if gg not in spisok_wall:
+                            self.flag = False
+                            self.rect.x = x * 90 + 22
+                            self.rect.y = y * 90 + 22
+                            first_small_flag = 'big'
+                            self.time_scale = 0
+                            first_tp_flag = False
+                else:
+                    first_small_flag = ''
+                    self.time_scale = 0
+                    FIRST_SPEED = 1
         else:
             if flag_finish:
                 image = load_image(f'{FIRST_PLAYER}_tank.png')
@@ -1336,7 +1392,7 @@ class First_tank(pygame.sprite.Sprite):
                             bullet.image = pygame.transform.rotate(bullet.image, 270)
                             bullet.rect = bullet.image.get_rect()
                         bullet.direction = 'left'
-                        bullet.rect.x = self.rect.x + self.image.get_width() // 2 - 67
+                        bullet.rect.x = self.rect.x + self.image.get_width() // 2 - 71
                         bullet.rect.y = self.rect.y + self.image.get_height() // 2 - 5
                         bullet.x1 = self.rect.x + self.image.get_width() // 2 - 70
                         bullet.y1 = self.rect.y + self.image.get_height() // 2 - 5
@@ -1390,13 +1446,13 @@ class First_tank(pygame.sprite.Sprite):
             self.rect.x += self.speedx
             if FIRST_SPEED == 3:
                 if pygame.sprite.spritecollideany(self, left_st_wall):
-                    self.rect.x += 2
+                    self.rect.x += 3
                 if pygame.sprite.spritecollideany(self, right_st_wall):
-                    self.rect.x -= 2
+                    self.rect.x -= 3
                 if pygame.sprite.spritecollideany(self, down_st_wall):
-                    self.rect.y += 2
+                    self.rect.y += 3
                 if pygame.sprite.spritecollideany(self, up_st_wall):
-                    self.rect.y -= 2
+                    self.rect.y -= 3
             if self.rect.right > 900:
                 self.rect.right = 900
             if self.rect.left < 0:
@@ -1424,11 +1480,12 @@ class Second_tank(pygame.sprite.Sprite):
         self.box_flag = False
         self.a = 80
         self.time_scale = 0
+        self.flag = True
         global second_selff
         second_selff = self
 
     def update(self, action):
-        global second_small_flag, flag_finish, SECOND_SPEED
+        global second_small_flag, flag_finish, SECOND_SPEED, second_tp_flag, second_portal_self
         if second_small_flag == 'big' and pygame.time.get_ticks() - self.time_scale >= 100:
             SECOND_SPEED = 0
             self.time_scale = pygame.time.get_ticks()
@@ -1450,25 +1507,43 @@ class Second_tank(pygame.sprite.Sprite):
                 second_small_flag = ''
                 self.time_scale = 0
                 SECOND_SPEED = 1
-        elif second_small_flag == 'small' and self.a != 50 and pygame.time.get_ticks() - self.time_scale >= 100:
-            self.time_scale = pygame.time.get_ticks()
-            im = load_image(f'{SECOND_PLAYER}_tank.png')
-            self.a -= 5
-            im = pygame.transform.scale(im, (self.a, self.a))
-            self.image = im
-            x, y = self.rect.x, self.rect.y
-            self.rect = self.image.get_rect()
-            self.rect.x = x // 90 * 90 + 15
-            self.rect.y = y // 90 * 90 + 15
-            if self.direction == 'down':
-                self.image = pygame.transform.rotate(self.image, 180)
-            elif self.direction == 'left':
-                self.image = pygame.transform.rotate(self.image, 90)
-            elif self.direction == 'right':
-                self.image = pygame.transform.rotate(self.image, 270)
+                self.flag = True
+        elif second_small_flag == 'small' and pygame.time.get_ticks() - self.time_scale >= 100:
+            if self.a != 50:
+                SECOND_SPEED = 0
+                self.time_scale = pygame.time.get_ticks()
+                im = load_image(f'{SECOND_PLAYER}_tank.png')
+                self.a -= 5
+                im = pygame.transform.scale(im, (self.a, self.a))
+                self.image = im
+                x, y = self.rect.x, self.rect.y
+                self.rect = self.image.get_rect()
+                self.rect.x = x // 90 * 90 + 15
+                self.rect.y = y // 90 * 90 + 15
+                if self.direction == 'down':
+                    self.image = pygame.transform.rotate(self.image, 180)
+                elif self.direction == 'left':
+                    self.image = pygame.transform.rotate(self.image, 90)
+                elif self.direction == 'right':
+                    self.image = pygame.transform.rotate(self.image, 270)
             if self.a == 50:
-                second_small_flag = ''
-                self.time_scale = 0
+                if second_tp_flag:
+                    second_portal_self.rect.x, second_portal_self.rect.y = -100, -100
+                    while self.flag:
+                        x = random.randint(0, 9)
+                        y = random.randint(0, 9)
+                        gg = f'{x} {y}'
+                        if gg not in spisok_wall:
+                            self.flag = False
+                            self.rect.x = x * 90 + 22
+                            self.rect.y = y * 90 + 22
+                            second_small_flag = 'big'
+                            self.time_scale = 0
+                            second_tp_flag = False
+                else:
+                    second_small_flag = ''
+                    self.time_scale = 0
+                    SECOND_SPEED = 1
         else:
             if flag_finish:
                 image = load_image(f'{SECOND_PLAYER}_tank.png')
@@ -1551,7 +1626,7 @@ class Second_tank(pygame.sprite.Sprite):
                             bullet.image = pygame.transform.rotate(bullet.image, 270)
                             bullet.rect = bullet.image.get_rect()
                         bullet.direction = 'left'
-                        bullet.rect.x = self.rect.x + self.image.get_width() // 2 - 70
+                        bullet.rect.x = self.rect.x + self.image.get_width() // 2 - 71
                         bullet.rect.y = self.rect.y + self.image.get_height() // 2 - 5
                         bullet.x1 = self.rect.x + self.image.get_width() // 2 - 67
                         bullet.y1 = self.rect.y + self.image.get_height() // 2 - 5
@@ -1605,13 +1680,13 @@ class Second_tank(pygame.sprite.Sprite):
             self.rect.x += self.speedx
             if SECOND_SPEED == 3:
                 if pygame.sprite.spritecollideany(self, left_st_wall):
-                    self.rect.x += 2
+                    self.rect.x += 3
                 if pygame.sprite.spritecollideany(self, right_st_wall):
-                    self.rect.x -= 2
+                    self.rect.x -= 3
                 if pygame.sprite.spritecollideany(self, down_st_wall):
-                    self.rect.y += 2
+                    self.rect.y += 3
                 if pygame.sprite.spritecollideany(self, up_st_wall):
-                    self.rect.y -= 2
+                    self.rect.y -= 3
             if self.rect.right > 900:
                 self.rect.right = 900
             if self.rect.left < 0:
@@ -1625,6 +1700,8 @@ class Second_tank(pygame.sprite.Sprite):
 def fight_screen_update():
     level_map = load_level(MAP)
     generate_level(level_map)
+    spisok_wall.append('2 0')
+    spisok_wall.append('7 0')
 
 
 def main():
@@ -1644,7 +1721,8 @@ def main():
     im = pygame.transform.rotate(im, 180)
     second_tank.image = im
     fight_screen_update()
-    time = pygame.time.get_ticks()
+    time_box = pygame.time.get_ticks()
+    time_portal = pygame.time.get_ticks()
 
     all_sprites.add(sprite_group)
     all_sprites.add(first_sprites)
@@ -1660,24 +1738,28 @@ def main():
     while running:
         pygame.mouse.set_visible(False)
         clock.tick(FPS)
-        if pygame.time.get_ticks() - time >= 15000:
-            box = random.choice(['Fast_Box'])
+        if pygame.time.get_ticks() - time_portal >= 10000:
+            Portal()
+            all_sprites.add(portal_sprites)
+            time_portal = pygame.time.get_ticks()
+        if pygame.time.get_ticks() - time_box >= 15000:
+            box = random.choice(['Small_Box'])
             if box == 'Med_Box':
                 Med_Box()
                 all_sprites.add(med_box_sprites)
-                time = pygame.time.get_ticks()
+                time_box = pygame.time.get_ticks()
             elif box == 'Bullet_Box':
                 Bullet_Box()
                 all_sprites.add(bullet_box_sprites)
-                time = pygame.time.get_ticks()
+                time_box = pygame.time.get_ticks()
             elif box == 'Small_Box':
                 Small_Box()
                 all_sprites.add(small_box_sprites)
-                time = pygame.time.get_ticks()
+                time_box = pygame.time.get_ticks()
             else:
                 Fast_Box()
                 all_sprites.add(fast_box_sprites)
-                time = pygame.time.get_ticks()
+                time_box = pygame.time.get_ticks()
         if flag_finish:
             first_drive_sound.stop()
             second_drive_sound.stop()
@@ -1738,6 +1820,7 @@ def main():
             fast_box_sprites.update()
             bullet_box_sprites.update()
             small_box_sprites.update()
+            portal_sprites.update()
             first_sprites.update(None)
             second_sprites.update(None)
             all_sprites.draw(screen)
