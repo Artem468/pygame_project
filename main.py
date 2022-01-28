@@ -87,6 +87,12 @@ tile_width = tile_height = 90
 pygame.display.set_icon(load_image('icon.png'))
 
 
+class ScreenFrame(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.rect = (0, 0, 500, 500)
+
+
 class SpriteGroup(pygame.sprite.Group):
     def __init__(self):
         super().__init__()
@@ -522,10 +528,7 @@ def print_health():
 
 def finish_screen(player):
     pygame.mouse.set_visible(True)
-    color = pygame.Surface((900, 900))
-    color.set_alpha(220)
-    color.fill((0, 0, 0))
-    screen.blit(color, (0, 0))
+    screen.fill((0, 0, 0))
     font = pygame.font.Font(r'data\teletactile.ttf', 50)
     text_coord = width // 2
     if player == 'First player':
@@ -1739,9 +1742,9 @@ def fight_screen_update():
 
 
 def main():
-    global first_sprites, second_sprites, flag_pause, FIRST_SPEED, SECOND_SPEED
-    global first_drive_sound, second_drive_sound, first_selff, second_selff
-    global running, flag_finish, FIRST_HP, SECOND_HP, first_size, second_size
+    global first_sprites, second_sprites, flag_pause, FIRST_SPEED, SECOND_SPEED, med_box_sprites, bullet_sprites
+    global first_drive_sound, second_drive_sound, first_selff, second_selff, fast_box_sprites, bullet_box_sprites
+    global running, flag_finish, FIRST_HP, SECOND_HP, first_size, second_size, small_box_sprites, portal_sprites
     global up_st_wall, down_st_wall, left_st_wall, right_st_wall, FIRST_TIME_RELOAD, SECOND_TIME_RELOAD
     first_sprites = pygame.sprite.Group()
     first_tank = First_tank(first_sprites)
@@ -1815,6 +1818,12 @@ def main():
             down_st_wall = pygame.sprite.Group()
             left_st_wall = pygame.sprite.Group()
             right_st_wall = pygame.sprite.Group()
+            med_box_sprites = pygame.sprite.Group()
+            fast_box_sprites = pygame.sprite.Group()
+            small_box_sprites = pygame.sprite.Group()
+            bullet_box_sprites = pygame.sprite.Group()
+            portal_sprites = pygame.sprite.Group()
+            bullet_sprites = pygame.sprite.Group()
             return
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
